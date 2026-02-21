@@ -1,25 +1,22 @@
-import { Box, Text } from "@opentui/core"
 import type { CavaPanelProps } from "./cava-panel.types"
 
 export function CavaPanel(props: CavaPanelProps) {
   const rendered = generateCava(props.width, props.lines, props.phase)
 
-  return Box(
-    {
-      ...(props.fill ? {} : { height: Math.max(3, props.lines + 2) }),
-      borderStyle: "single",
-      borderColor: props.theme.border,
-      title: "CAVA",
-      backgroundColor: props.theme.panel,
-      padding: 1,
-      ...(props.fill ? { flexGrow: 1 } : {}),
-    },
-    ...rendered.map((line) =>
-      Text({
-        content: line,
-        fg: props.theme.accent,
-      }),
-    ),
+  return (
+    <box
+      {...(props.fill ? {} : { height: Math.max(3, props.lines + 2) })}
+      borderStyle="single"
+      borderColor={props.theme.border}
+      title="CAVA"
+      backgroundColor={props.theme.panel}
+      padding={1}
+      {...(props.fill ? { flexGrow: 1 } : {})}
+    >
+      {rendered.map((line, index) => (
+        <text key={`${index}:${line.length}`} content={line} fg={props.theme.accent} />
+      ))}
+    </box>
   )
 }
 

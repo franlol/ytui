@@ -1,9 +1,11 @@
 import type { ThemeTokens } from "../../registries/themes/theme.registry.types"
-import type { SelectRenderable } from "@opentui/core"
+import type { Track } from "../../types/app.types"
 
 export type QueueListProps = {
   totalCount: number
   theme: ThemeTokens
   heightRows: number
-  selectRenderable: SelectRenderable
+  widthCols: number
+  tracks: Track[]
+  selectedIndex: number
 }

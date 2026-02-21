@@ -27,6 +27,7 @@ Protect MVP UX consistency.
 - SEARCH, NOW PLAYING, and CAVA panels keep fixed heights while results/queue consume remaining space
 - on very small terminals, fixed panels remain visible first and results/queue may collapse when remaining height is below renderable minimum
 - SEARCH height budget accounts for border + padding so CAVA keeps a visible gap above statusline
+- UI state flow remains `react-redux` driven (no imperative render loop state syncing)
 
 ## Blocking Criteria
 

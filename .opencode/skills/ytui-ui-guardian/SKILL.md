@@ -14,6 +14,7 @@ metadata:
 - Verifies fixed-height panel constraints for SEARCH, NOW PLAYING, and CAVA with results/queue filling remaining space.
 - Verifies fixed panels take precedence in very small viewports and list panels may collapse if remaining space is insufficient.
 - Verifies SEARCH panel height budgeting includes its chrome so CAVA does not touch the statusline.
+- Verifies UI behavior is driven through `@opentui/react` + `react-redux` state flow, not imperative render-loop syncing.
 
 ## When to use
 

@@ -17,4 +17,8 @@ Executable OpenCode runtime definitions live in `.opencode/`:
 - `.opencode/commands/`
 - `.opencode/skills/<name>/SKILL.md`
 
+UI runtime note:
+- Core app rendering uses `@opentui/react` with `react-redux` for store binding.
+- Keep Redux Toolkit slices/thunks and service/provider boundaries unchanged when iterating on UI.
+
 Start here, then read `docs/policies/agent-only-contributions.md`.
