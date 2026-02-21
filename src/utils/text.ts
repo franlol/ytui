@@ -14,3 +14,21 @@ export function composeLeftRight(left: string, right: string, width: number): st
   const spacing = Math.max(1, width - clampedLeft.length - right.length)
   return `${clampedLeft}${" ".repeat(spacing)}${right}`
 }
+
+export function composeLeftStatusRight(left: string, status: string | null, right: string, width: number): string {
+  if (!status) {
+    return composeLeftRight(left, right, width)
+  }
+
+  const maxPrefix = Math.max(4, width - right.length - 1)
+  const clampedLeft = truncate(left, maxPrefix)
+
+  let prefix = clampedLeft
+  const statusWidth = maxPrefix - clampedLeft.length - 2
+  if (statusWidth > 0) {
+    prefix = `${clampedLeft}  ${truncate(status, statusWidth)}`
+  }
+
+  const spacing = Math.max(1, width - prefix.length - right.length)
+  return `${prefix}${" ".repeat(spacing)}${right}`
+}

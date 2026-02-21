@@ -25,9 +25,12 @@ Protect MVP UX consistency.
 - statusline behavior remains Vim-like
 - results/queue lists are viewport-safe (no overflow beyond panel height)
 - SEARCH, NOW PLAYING, and CAVA panels keep fixed heights while results/queue consume remaining space
+- NOW PLAYING renders title, author, and time+progress on separate lines without content overlap
 - on very small terminals, fixed panels remain visible first and results/queue may collapse when remaining height is below renderable minimum
 - SEARCH height budget accounts for border + padding so CAVA keeps a visible gap above statusline
 - UI state flow remains `react-redux` driven (no imperative render loop state syncing)
+- playback UX remains coherent: `Enter` in NORMAL plays selected queue track, `Ctrl+P` in SEARCH plays selected result, `Space` pauses/resumes current track
+- statusline keeps mode/command context on the left; transient feedback messages render in a side slot without replacing mode/command
 
 ## Blocking Criteria
 

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { parseCommandInput } from "../../features/commands/command-parser/command-parser"
 import { playbackActions } from "../../features/playback/playback.slice"
+import { runPlayTrackThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
 import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
@@ -76,6 +77,24 @@ export function AppRoot(props: AppRootProps) {
     [props.commandRegistry, props.progressStyleRegistry, props.requestQuit, props.store, props.themeRegistry, setStatusWithTimeout],
   )
 
+  const playTrackFromState = useCallback(() => {
+    if (state.ui.mode === "search") {
+      const track = state.search.results[state.search.selectedIndex]
+      if (track) {
+        dispatch(runPlayTrackThunk(track))
+      }
+      return
+    }
+
+    const track = state.queue.tracks[state.queue.selectedIndex]
+    if (track) {
+      dispatch(runPlayTrackThunk(track))
+      return
+    }
+
+    dispatch(uiActions.setStatus({ message: "INFO: queue is empty", level: "info" }))
+  }, [dispatch, state.queue.selectedIndex, state.queue.tracks, state.search.results, state.search.selectedIndex, state.ui.mode])
+
   useKeyboard(
     (key) => {
       if (state.ui.helpOpen) {
@@ -121,8 +140,7 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (key.name === "space") {
-        dispatch(playbackActions.togglePlaying())
-        setStatusWithTimeout(`OK: ${props.store.getState().playback.playing ? "playing" : "paused"}`, "ok")
+        dispatch(runTogglePauseResumeThunk())
         return
       }
 
@@ -136,6 +154,11 @@ export function AppRoot(props: AppRootProps) {
       if (state.ui.mode === "search") {
         if (key.name === "return") {
           dispatch(runSearchThunk())
+          return
+        }
+
+        if (key.ctrl && key.name === "p") {
+          playTrackFromState()
           return
         }
 
@@ -161,6 +184,11 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (state.ui.mode === "normal") {
+        if (key.name === "return") {
+          playTrackFromState()
+          return
+        }
+
         if (key.name === "j" || key.name === "down") {
           dispatch(queueActions.moveSelectionDown())
           return

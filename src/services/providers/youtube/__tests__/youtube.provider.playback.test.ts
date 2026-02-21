@@ -1,0 +1,32 @@
+import { describe, expect, it } from "bun:test"
+import { YoutubeProvider } from "../youtube.provider"
+import type { PlaybackService } from "../../../playback/playback.service.types"
+import type { Track } from "../../../../types/app.types"
+
+const track: Track = {
+  id: "dQw4w9WgXcQ",
+  title: "Demo",
+  author: "Artist",
+  durationSec: 180,
+  durationLabel: "03:00",
+  source: "youtube",
+}
+
+describe("youtube provider playback", () => {
+  it("resolves a youtube watch URL when track id is a video id", async () => {
+    let playedUrl = ""
+    const playbackService: PlaybackService = {
+      play: async (source) => {
+        playedUrl = source.url
+      },
+      pause: async () => {},
+      resume: async () => {},
+      stop: async () => {},
+    }
+
+    const provider = new YoutubeProvider({ playbackService })
+    await provider.playback?.play(track)
+
+    expect(playedUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+  })
+})

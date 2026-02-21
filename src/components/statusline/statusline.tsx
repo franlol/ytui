@@ -1,4 +1,4 @@
-import { composeLeftRight } from "../../utils/text"
+import { composeLeftStatusRight } from "../../utils/text"
 import type { StatuslineProps } from "./statusline.types"
 
 export function Statusline(props: StatuslineProps) {
@@ -8,13 +8,13 @@ export function Statusline(props: StatuslineProps) {
   if (props.commandActive) {
     left = `:${props.commandBuffer}`
   }
-  if (props.statusMessage) {
-    left = props.statusMessage
-  }
 
   return (
     <box width="100%" height={1} backgroundColor={props.theme.status} paddingLeft={1} paddingRight={1}>
-      <text content={composeLeftRight(left, right, Math.max(20, props.width - 2))} fg={props.theme.statusText} />
+      <text
+        content={composeLeftStatusRight(left, props.statusMessage, right, Math.max(20, props.width - 2))}
+        fg={props.theme.statusText}
+      />
     </box>
   )
 }

@@ -20,5 +20,6 @@ Executable OpenCode runtime definitions live in `.opencode/`:
 UI runtime note:
 - Core app rendering uses `@opentui/react` with `react-redux` for store binding.
 - Keep Redux Toolkit slices/thunks and service/provider boundaries unchanged when iterating on UI.
+- YouTube playback uses a provider-backed playback service adapter (`mpv` backend); ensure `mpv` is available on PATH for audible playback.
 
 Start here, then read `docs/policies/agent-only-contributions.md`.

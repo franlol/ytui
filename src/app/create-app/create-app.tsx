@@ -97,6 +97,10 @@ export async function createApp(): Promise<AppRuntime> {
       providersEnabled: current.provider.available.map((provider: ProviderInfo) => provider.id),
     })
 
+    void providerManager.getActive()?.playback?.stop().catch(() => {
+      // best effort shutdown
+    })
+
     if (started) {
       root.unmount()
     }

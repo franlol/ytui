@@ -1,0 +1,144 @@
+import { describe, expect, it } from "bun:test"
+import { createAppStore } from "../../../state/store/store"
+import { uiActions } from "../../ui/ui.slice"
+import { playbackActions } from "../playback.slice"
+import { runPlayTrackThunk, runTogglePauseResumeThunk } from "../playback.thunks"
+import type { AppServices } from "../../../state/store/store.types"
+import type { MusicProvider } from "../../../services/providers/provider.types"
+import type { Track } from "../../../types/app.types"
+
+const track: Track = {
+  id: "t-1",
+  title: "Track One",
+  author: "Author",
+  durationSec: 180,
+  durationLabel: "03:00",
+  source: "youtube",
+}
+
+class FakeProviderManager {
+  private active: MusicProvider | null = null
+
+  register(provider: MusicProvider): void {
+    this.active = provider
+  }
+
+  list(): MusicProvider[] {
+    return this.active ? [this.active] : []
+  }
+
+  setActive(_id: string): boolean {
+    return true
+  }
+
+  getActive(): MusicProvider | null {
+    return this.active
+  }
+
+  get(_id: string): MusicProvider | null {
+    return this.active
+  }
+}
+
+function makeServices(provider: MusicProvider): AppServices {
+  const providerManager = new FakeProviderManager()
+  providerManager.register(provider)
+
+  return {
+    configService: {
+      load: async () => {
+        throw new Error("unused in tests")
+      },
+      save: async () => {},
+    },
+    providerManager,
+    commandRegistry: {} as any,
+    themeRegistry: {} as any,
+    progressStyleRegistry: {} as any,
+  }
+}
+
+describe("playback thunks", () => {
+  it("plays selected track via provider playback capability", async () => {
+    let playedId = ""
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async (input) => {
+          playedId = input.id
+        },
+        pause: async () => {},
+        resume: async () => {},
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    await store.dispatch(runPlayTrackThunk(track))
+
+    const state = store.getState()
+    expect(playedId).toBe(track.id)
+    expect(state.playback.nowPlaying?.id).toBe(track.id)
+    expect(state.playback.playing).toBe(true)
+  })
+
+  it("toggles pause and resume through provider capability", async () => {
+    let paused = 0
+    let resumed = 0
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {
+          paused += 1
+        },
+        resume: async () => {
+          resumed += 1
+        },
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    store.dispatch(playbackActions.setPlaying(true))
+
+    await store.dispatch(runTogglePauseResumeThunk())
+    expect(store.getState().playback.playing).toBe(false)
+    expect(paused).toBe(1)
+
+    await store.dispatch(runTogglePauseResumeThunk())
+    expect(store.getState().playback.playing).toBe(true)
+    expect(resumed).toBe(1)
+  })
+
+  it("shows error status when provider has no playback capability", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: false, auth: false, library: false },
+      },
+    })
+
+    const { store } = createAppStore(services)
+    await store.dispatch(runPlayTrackThunk(track))
+
+    expect(store.getState().ui.statusLevel).toBe("err")
+    expect(store.getState().ui.statusMessage).toBe("ERR: provider has no playback capability")
+
+    store.dispatch(uiActions.clearStatus())
+    expect(store.getState().ui.statusMessage).toBeNull()
+  })
+})

@@ -27,6 +27,9 @@ export function HelpModal(props: HelpModalProps) {
       <text content=":theme list | :theme <name>" fg={props.theme.text} />
       <text content=":provider list|current|use <id>" fg={props.theme.text} />
       <text content=":plugin list|info <id>|reload" fg={props.theme.text} />
+      <text content="Enter (NORMAL): play selected queue track" fg={props.theme.text} />
+      <text content="Ctrl+P (SEARCH): play selected result" fg={props.theme.text} />
+      <text content="Space: pause/resume current track" fg={props.theme.text} />
       <text content="Close help: Esc / q / Enter" fg={props.theme.muted} />
     </box>
   )

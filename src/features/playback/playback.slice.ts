@@ -6,7 +6,7 @@ const initialState: PlaybackState = {
   nowPlaying: null,
   elapsedSec: 0,
   durationSec: 1,
-  playing: true,
+  playing: false,
   volume: 72,
 }
 
@@ -19,6 +19,7 @@ export const playbackSlice = createSlice({
       if (action.payload) {
         state.durationSec = Math.max(1, action.payload.durationSec)
         state.elapsedSec = 0
+        state.playing = false
       }
     },
     setPlaying(state, action: PayloadAction<boolean>) {

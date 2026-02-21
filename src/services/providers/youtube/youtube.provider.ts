@@ -1,4 +1,6 @@
 import type { Track } from "../../../types/app.types"
+import { PlaybackServiceError, MpvPlaybackService } from "../../playback/playback.service"
+import type { PlaybackService } from "../../playback/playback.service.types"
 import { YtDlpSearchService } from "../../search/search.service"
 import type { SearchService } from "../../search/search.service.types"
 import type { MusicProvider } from "../provider.types"
@@ -6,7 +8,7 @@ import type { YoutubeProviderCatalog } from "./youtube.provider.types"
 
 const defaultCatalog: Track[] = [
   {
-    id: "yt-1",
+    id: "dQw4w9WgXcQ",
     title: "Nujabes - Feather (Official Audio Remaster 2024 Extended Edition)",
     author: "Hydeout Productions",
     durationSec: 253,
@@ -14,7 +16,7 @@ const defaultCatalog: Track[] = [
     source: "youtube",
   },
   {
-    id: "yt-2",
+    id: "fJ9rUzIMcZQ",
     title: "J Dilla - So Far To Go (feat. Common and D'Angelo)",
     author: "Stones Throw",
     durationSec: 225,
@@ -22,7 +24,7 @@ const defaultCatalog: Track[] = [
     source: "youtube",
   },
   {
-    id: "yt-3",
+    id: "kXYiU_JCYtU",
     title: "Tomppabeats - monday loop",
     author: "Chillhop",
     durationSec: 176,
@@ -30,7 +32,7 @@ const defaultCatalog: Track[] = [
     source: "youtube",
   },
   {
-    id: "yt-4",
+    id: "09R8_2nJtjg",
     title: "uyama hiroto - Waltz for Life Will Born",
     author: "Hydeout Productions",
     durationSec: 280,
@@ -38,7 +40,7 @@ const defaultCatalog: Track[] = [
     source: "youtube",
   },
   {
-    id: "yt-5",
+    id: "e-ORhEE9VVg",
     title: "idealism - snowfall",
     author: "Lost in Dreams",
     durationSec: 182,
@@ -46,7 +48,7 @@ const defaultCatalog: Track[] = [
     source: "youtube",
   },
   {
-    id: "yt-6",
+    id: "3JZ_D3ELwOQ",
     title: "Eevee - forest walk",
     author: "Chillhop",
     durationSec: 201,
@@ -54,7 +56,7 @@ const defaultCatalog: Track[] = [
     source: "youtube",
   },
   {
-    id: "yt-7",
+    id: "YQHsXMglC9A",
     title: "saib - west lake",
     author: "Chillhop",
     durationSec: 169,
@@ -78,10 +80,12 @@ export class YoutubeProvider implements MusicProvider {
 
   private catalog: Track[]
   private searchService: SearchService
+  private playbackService: PlaybackService
 
   constructor(options?: YoutubeProviderCatalog) {
     this.catalog = options?.tracks ?? defaultCatalog
     this.searchService = options?.searchService ?? new YtDlpSearchService()
+    this.playbackService = options?.playbackService ?? new MpvPlaybackService()
   }
 
   search = {
@@ -115,9 +119,34 @@ export class YoutubeProvider implements MusicProvider {
   }
 
   playback = {
-    play: async (_track: Track) => {},
-    pause: async () => {},
-    resume: async () => {},
-    stop: async () => {},
+    play: async (track: Track) => {
+      const sourceUrl = resolveYoutubeTrackUrl(track)
+      await this.playbackService.play({ url: sourceUrl })
+    },
+    pause: async () => {
+      await this.playbackService.pause()
+    },
+    resume: async () => {
+      await this.playbackService.resume()
+    },
+    stop: async () => {
+      await this.playbackService.stop()
+    },
   }
+}
+
+function resolveYoutubeTrackUrl(track: Track): string {
+  if (track.source !== "youtube") {
+    throw new PlaybackServiceError(`unsupported track source: ${track.source}`)
+  }
+
+  if (!track.id) {
+    throw new PlaybackServiceError("missing YouTube track id")
+  }
+
+  if (track.id.startsWith("http://") || track.id.startsWith("https://")) {
+    return track.id
+  }
+
+  return `https://www.youtube.com/watch?v=${track.id}`
 }
