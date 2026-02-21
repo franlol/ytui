@@ -12,7 +12,13 @@ export function RootLayout(props: RootLayoutProps) {
     <box id="screen" width="100%" height="100%" backgroundColor={theme.bg} flexDirection="column">
       <Topbar theme={theme} />
       {props.state.ui.mode === "zen" ? (
-        <ZenLayout state={props.state} width={props.width} height={props.height} theme={theme} />
+        <ZenLayout
+          state={props.state}
+          width={props.width}
+          height={props.height}
+          theme={theme}
+          visualizerStyleRegistry={props.visualizerStyleRegistry}
+        />
       ) : (
         <MainLayout
           state={props.state}
@@ -20,6 +26,7 @@ export function RootLayout(props: RootLayoutProps) {
           height={props.height}
           theme={theme}
           progressStyleRegistry={props.progressStyleRegistry}
+          visualizerStyleRegistry={props.visualizerStyleRegistry}
         />
       )}
       <Statusline

@@ -119,6 +119,37 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
   })
 
   commandRegistry.register({
+    name: "cava",
+    description: "List or set cava style",
+    execute: (args, context) => {
+      const action = args[0] ?? "list"
+
+      if (action === "style") {
+        const value = args[1]
+        const styles = context.visualizerStyleRegistry.list()
+        const ids = styles.map((item) => item.id)
+
+        if (!value || value === "list") {
+          const current = context.getState().settings.cavaStyleId
+          context.dispatch(uiActions.setStatus({ message: `INFO: current=${current} | available=${ids.join("|")}`, level: "info" }))
+          return
+        }
+
+        if (context.visualizerStyleRegistry.get(value)) {
+          context.dispatch(settingsActions.setCavaStyle(value))
+          context.dispatch(uiActions.setStatus({ message: `OK: cava style ${value}`, level: "ok" }))
+          return
+        }
+
+        context.dispatch(uiActions.setStatus({ message: `ERR: use :cava style list|${ids.join("|")}`, level: "err" }))
+        return
+      }
+
+      context.dispatch(uiActions.setStatus({ message: "ERR: use :cava style list|<id>", level: "err" }))
+    },
+  })
+
+  commandRegistry.register({
     name: "provider",
     description: "Manage active provider",
     execute: (args, context) => {

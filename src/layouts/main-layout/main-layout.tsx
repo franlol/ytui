@@ -8,14 +8,18 @@ import type { MainLayoutProps } from "./main-layout.types"
 
 export function MainLayout(props: MainLayoutProps) {
   const isSearch = props.state.ui.mode === "search"
-  const contentWidth = Math.max(24, props.width - (props.state.ui.sidebarCollapsed ? 8 : 30))
+  const visualizerStyle = props.visualizerStyleRegistry.getOrFallback(props.state.settings.cavaStyleId)
+  const outerPaddingCols = 2
+  const sidebarCols = props.state.ui.sidebarCollapsed ? 0 : 20
+  const layoutGapCols = props.state.ui.sidebarCollapsed ? 0 : 1
+  const contentWidth = Math.max(24, props.width - outerPaddingCols - sidebarCols - layoutGapCols)
   const topbarRows = 1
   const statuslineRows = 1
   const outerPaddingRows = 2
   const gapRows = isSearch ? 3 : 2
   const searchRows = isSearch ? 4 : 0
   const nowPlayingRows = 5
-  const cavaRows = Math.max(3, props.state.settings.cavaHeight + 2)
+  const cavaRows = props.state.settings.cavaEnabled ? Math.max(4, props.state.settings.cavaHeight + 3) : 0
   const fixedRows = topbarRows + statuslineRows + outerPaddingRows + gapRows + searchRows + nowPlayingRows + cavaRows
   const listHeightRows = Math.max(0, props.height - fixedRows)
   const showListPanel = listHeightRows >= 3
@@ -58,12 +62,15 @@ export function MainLayout(props: MainLayoutProps) {
           theme={props.theme}
           width={contentWidth}
         />
-        <CavaPanel
-          phase={props.state.visualizer.phase}
-          width={Math.max(16, props.width - (props.state.ui.sidebarCollapsed ? 8 : 30))}
-          lines={props.state.settings.cavaHeight}
-          theme={props.theme}
-        />
+        {props.state.settings.cavaEnabled ? (
+          <CavaPanel
+            bars={props.state.visualizer.bars}
+            ramp={visualizerStyle.ramp}
+            width={Math.max(16, contentWidth)}
+            lines={props.state.settings.cavaHeight}
+            theme={props.theme}
+          />
+        ) : null}
       </box>
     </box>
   )

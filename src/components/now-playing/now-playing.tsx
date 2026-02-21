@@ -4,7 +4,7 @@ import { truncate } from "../../utils/text"
 import type { NowPlayingProps } from "./now-playing.types"
 
 export function NowPlaying(props: NowPlayingProps) {
-  const contentWidth = Math.max(12, props.width - 6)
+  const contentWidth = Math.max(12, props.width - 4)
 
   if (!props.track) {
     return (

@@ -10,8 +10,10 @@ import type { VisualizerState } from "../../features/visualizer/visualizer.types
 import type { CommandRegistry } from "../../registries/commands/command.registry"
 import type { ProgressStyleRegistry } from "../../registries/progress-styles/progress-style.registry"
 import type { ThemeRegistry } from "../../registries/themes/theme.registry"
+import type { VisualizerStyleRegistry } from "../../registries/visualizer-styles/visualizer-style.registry"
 import type { ConfigService } from "../../services/config/config.service.types"
 import type { ProviderManager } from "../../services/providers/provider-manager/provider-manager.types"
+import type { VisualizerService } from "../../services/visualizer/cava-visualizer.service.types"
 
 export type RootState = {
   ui: UiState
@@ -28,9 +30,11 @@ export type RootState = {
 export type AppServices = {
   configService: ConfigService
   providerManager: ProviderManager
+  visualizerService: VisualizerService
   commandRegistry: CommandRegistry
   themeRegistry: ThemeRegistry
   progressStyleRegistry: ProgressStyleRegistry
+  visualizerStyleRegistry: VisualizerStyleRegistry
 }
 
 export type AppDispatch = ThunkDispatch<RootState, AppServices, UnknownAction>

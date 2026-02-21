@@ -6,6 +6,7 @@ import type { SettingsState } from "./settings.types"
 const initialState: SettingsState = {
   themeId: "gruvbox",
   progressStyleId: "blocks",
+  cavaStyleId: "blocks",
   resultsLimit: 20,
   cavaEnabled: true,
   cavaHeight: 2,
@@ -21,6 +22,7 @@ export const settingsSlice = createSlice({
     applyConfig(state, action: PayloadAction<AppConfig>) {
       state.themeId = action.payload.theme
       state.progressStyleId = action.payload.progressStyle
+      state.cavaStyleId = action.payload.cavaStyle
       state.resultsLimit = action.payload.resultsLimit
       state.cavaEnabled = action.payload.cavaEnabled
       state.cavaHeight = action.payload.cavaHeight
@@ -33,6 +35,9 @@ export const settingsSlice = createSlice({
     },
     setProgressStyle(state, action: PayloadAction<string>) {
       state.progressStyleId = action.payload
+    },
+    setCavaStyle(state, action: PayloadAction<string>) {
+      state.cavaStyleId = action.payload
     },
     setDefaultMode(state, action: PayloadAction<Mode>) {
       state.defaultMode = action.payload

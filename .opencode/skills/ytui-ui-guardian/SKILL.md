@@ -18,6 +18,8 @@ metadata:
 - Verifies UI behavior is driven through `@opentui/react` + `react-redux` state flow, not imperative render-loop syncing.
 - Verifies playback controls are discoverable and coherent (`Enter` NORMAL play, `Ctrl+P` SEARCH play, `Space` pause/resume).
 - Verifies statusline preserves left mode/command context while feedback messages render in a side slot.
+- Verifies visualizer behavior stays scoped to active ytui playback session and unsupported runtime paths degrade gracefully.
+- Verifies visualizer glyph style behavior remains registry-driven with deterministic fallback for unknown style ids.
 
 ## When to use
 

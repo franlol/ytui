@@ -2,6 +2,7 @@ export type AppConfig = {
   configVersion: number
   theme: string
   progressStyle: string
+  cavaStyle: string
   sidebar: "on" | "off"
   defaultMode: "normal" | "search" | "zen"
   resultsLimit: number

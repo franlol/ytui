@@ -132,6 +132,9 @@ export class YoutubeProvider implements MusicProvider {
     stop: async () => {
       await this.playbackService.stop()
     },
+    getPlaybackSession: () => {
+      return this.playbackService.getCurrentSession()
+    },
   }
 }
 

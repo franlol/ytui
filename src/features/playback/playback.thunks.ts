@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { uiActions } from "../ui/ui.slice"
+import { runStartVisualizerThunk, runStopVisualizerThunk } from "../visualizer/visualizer.thunks"
 import { playbackActions } from "./playback.slice"
 import type { AppServices, RootState } from "../../state/store/store.types"
 import type { Track } from "../../types/app.types"
@@ -15,9 +16,16 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
     }
 
     try {
+      await dispatch(runStopVisualizerThunk())
       await provider.playback.play(track)
       dispatch(playbackActions.setNowPlaying(track))
       dispatch(playbackActions.setPlaying(true))
+
+      const session = provider.playback.getPlaybackSession?.()
+      if (session) {
+        await dispatch(runStartVisualizerThunk(session))
+      }
+
       dispatch(uiActions.setStatus({ message: `OK: playing ${track.title}`, level: "ok" }))
     } catch (error) {
       const message = error instanceof Error ? error.message : "Playback failed"

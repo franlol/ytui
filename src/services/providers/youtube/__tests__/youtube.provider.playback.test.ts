@@ -18,10 +18,12 @@ describe("youtube provider playback", () => {
     const playbackService: PlaybackService = {
       play: async (source) => {
         playedUrl = source.url
+        return { id: "session-1", visualizerSource: "ytui_session.monitor" }
       },
       pause: async () => {},
       resume: async () => {},
       stop: async () => {},
+      getCurrentSession: () => ({ id: "session-1", visualizerSource: "ytui_session.monitor" }),
     }
 
     const provider = new YoutubeProvider({ playbackService })

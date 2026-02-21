@@ -6,6 +6,7 @@ import { runPlayTrackThunk, runTogglePauseResumeThunk } from "../playback.thunks
 import type { AppServices } from "../../../state/store/store.types"
 import type { MusicProvider } from "../../../services/providers/provider.types"
 import type { Track } from "../../../types/app.types"
+import { createDefaultVisualizerStyleRegistry } from "../../../registries/visualizer-styles/visualizer-style.registry"
 
 const track: Track = {
   id: "t-1",
@@ -52,6 +53,11 @@ function makeServices(provider: MusicProvider): AppServices {
       save: async () => {},
     },
     providerManager,
+    visualizerService: {
+      start: async () => {},
+      stop: async () => {},
+    },
+    visualizerStyleRegistry: createDefaultVisualizerStyleRegistry(),
     commandRegistry: {} as any,
     themeRegistry: {} as any,
     progressStyleRegistry: {} as any,

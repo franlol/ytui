@@ -8,7 +8,6 @@ import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
 import { uiActions } from "../../features/ui/ui.slice"
-import { visualizerActions } from "../../features/visualizer/visualizer.slice"
 import { RootLayout } from "../../layouts/root-layout/root-layout"
 import type { AppDispatch, RootState } from "../../state/store/store.types"
 import type { AppRootProps } from "./app-root.types"
@@ -22,7 +21,6 @@ export function AppRoot(props: AppRootProps) {
   useEffect(() => {
     const frameTimer = setInterval(() => {
       dispatch(playbackActions.tick())
-      dispatch(visualizerActions.tickPhase())
     }, 1000)
 
     return () => {
@@ -71,6 +69,7 @@ export function AppRoot(props: AppRootProps) {
         getState: props.store.getState,
         themeRegistry: props.themeRegistry,
         progressStyleRegistry: props.progressStyleRegistry,
+        visualizerStyleRegistry: props.visualizerStyleRegistry,
         requestQuit: props.requestQuit,
       })
     },
@@ -209,6 +208,7 @@ export function AppRoot(props: AppRootProps) {
       height={dimensions.height}
       themeRegistry={props.themeRegistry}
       progressStyleRegistry={props.progressStyleRegistry}
+      visualizerStyleRegistry={props.visualizerStyleRegistry}
     />
   )
 }

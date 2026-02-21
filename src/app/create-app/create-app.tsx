@@ -13,11 +13,13 @@ import { uiActions } from "../../features/ui/ui.slice"
 import { CommandRegistry } from "../../registries/commands/command.registry"
 import { createDefaultProgressStyleRegistry } from "../../registries/progress-styles/progress-style.registry"
 import { createDefaultThemeRegistry } from "../../registries/themes/theme.registry"
+import { createDefaultVisualizerStyleRegistry } from "../../registries/visualizer-styles/visualizer-style.registry"
 import { FileConfigService } from "../../services/config/config.service"
 import { DefaultProviderManager } from "../../services/providers/provider-manager/provider-manager"
 import { YoutubeProvider } from "../../services/providers/youtube/youtube.provider"
 import { loadPluginManifests } from "../../services/plugins/plugin-loader/plugin-loader"
 import { YtDlpSearchService } from "../../services/search/search.service"
+import { CavaVisualizerService } from "../../services/visualizer/cava-visualizer.service"
 import { createAppStore } from "../../state/store/store"
 import type { AppServices } from "../../state/store/store.types"
 import type { ProviderInfo } from "../../types/app.types"
@@ -28,17 +30,21 @@ export async function createApp(): Promise<AppRuntime> {
   const commandRegistry = new CommandRegistry()
   const themeRegistry = createDefaultThemeRegistry()
   const progressStyleRegistry = createDefaultProgressStyleRegistry()
+  const visualizerStyleRegistry = createDefaultVisualizerStyleRegistry()
   const providerManager = new DefaultProviderManager()
   const searchService = new YtDlpSearchService()
+  const visualizerService = new CavaVisualizerService()
 
   providerManager.register(new YoutubeProvider({ searchService }))
 
   const services: AppServices = {
     configService,
     providerManager,
+    visualizerService,
     commandRegistry,
     themeRegistry,
     progressStyleRegistry,
+    visualizerStyleRegistry,
   }
 
   const { store } = createAppStore(services)
@@ -84,6 +90,7 @@ export async function createApp(): Promise<AppRuntime> {
       configVersion: 1,
       theme: current.settings.themeId,
       progressStyle: current.settings.progressStyleId,
+      cavaStyle: current.settings.cavaStyleId,
       sidebar: current.ui.sidebarCollapsed ? "off" : "on",
       defaultMode: current.settings.defaultMode,
       resultsLimit: current.settings.resultsLimit,
@@ -98,6 +105,9 @@ export async function createApp(): Promise<AppRuntime> {
     })
 
     void providerManager.getActive()?.playback?.stop().catch(() => {
+      // best effort shutdown
+    })
+    void visualizerService.stop().catch(() => {
       // best effort shutdown
     })
 
@@ -122,6 +132,7 @@ export async function createApp(): Promise<AppRuntime> {
           commandRegistry={commandRegistry}
           themeRegistry={themeRegistry}
           progressStyleRegistry={progressStyleRegistry}
+          visualizerStyleRegistry={visualizerStyleRegistry}
           requestQuit={destroy}
         />
       </Provider>,

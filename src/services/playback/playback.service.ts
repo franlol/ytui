@@ -4,8 +4,8 @@ import { rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { Socket } from "node:net"
-import { spawn, type ChildProcess } from "node:child_process"
-import type { PlaybackService, PlaybackSource } from "./playback.service.types"
+import { execFile, spawn, type ChildProcess } from "node:child_process"
+import type { PlaybackService, PlaybackSession, PlaybackSource } from "./playback.service.types"
 
 const DEFAULT_TIMEOUT_MS = 10000
 
@@ -19,17 +19,23 @@ export class PlaybackServiceError extends Error {
 export class MpvPlaybackService implements PlaybackService {
   private process: ChildProcess | null = null
   private ipcPath: string | null = null
+  private currentSession: PlaybackSession | null = null
+  private currentRoute: AudioRoute | null = null
 
   constructor(private readonly binaryPath = "mpv") {}
 
-  async play(source: PlaybackSource): Promise<void> {
+  async play(source: PlaybackSource): Promise<PlaybackSession> {
     await this.stop()
+
+    const sessionId = randomUUID()
+    this.currentRoute = await createAudioRoute(sessionId)
 
     const ipcPath = join(tmpdir(), `ytui-mpv-${process.pid}-${randomUUID()}.sock`)
     const args = [
       "--no-video",
       "--really-quiet",
       `--input-ipc-server=${ipcPath}`,
+      ...(this.currentRoute ? [`--audio-device=pulse/${this.currentRoute.sinkName}`] : []),
       source.url,
     ]
 
@@ -73,6 +79,10 @@ export class MpvPlaybackService implements PlaybackService {
 
     this.process = child
     this.ipcPath = ipcPath
+    this.currentSession = {
+      id: sessionId,
+      visualizerSource: this.currentRoute?.monitorSource ?? null,
+    }
 
     try {
       await this.waitForPlaybackReady()
@@ -83,8 +93,12 @@ export class MpvPlaybackService implements PlaybackService {
 
     child.once("exit", () => {
       this.process = null
+      this.currentSession = null
       void this.cleanupSocketFile()
+      void this.cleanupAudioRoute()
     })
+
+    return this.currentSession
   }
 
   async pause(): Promise<void> {
@@ -112,7 +126,13 @@ export class MpvPlaybackService implements PlaybackService {
     }
 
     this.process = null
+    this.currentSession = null
     await this.cleanupSocketFile()
+    await this.cleanupAudioRoute()
+  }
+
+  getCurrentSession(): PlaybackSession | null {
+    return this.currentSession
   }
 
   private async sendCommand(command: unknown[], timeoutMs = DEFAULT_TIMEOUT_MS): Promise<void> {
@@ -241,6 +261,22 @@ export class MpvPlaybackService implements PlaybackService {
       // best effort cleanup
     }
   }
+
+  private async cleanupAudioRoute(): Promise<void> {
+    const route = this.currentRoute
+    this.currentRoute = null
+    if (!route) {
+      return
+    }
+
+    if (route.loopbackModuleId) {
+      await unloadModule(route.loopbackModuleId)
+    }
+
+    if (route.sinkModuleId) {
+      await unloadModule(route.sinkModuleId)
+    }
+  }
 }
 
 async function waitForFile(path: string, timeoutMs: number): Promise<void> {
@@ -252,4 +288,68 @@ async function waitForFile(path: string, timeoutMs: number): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 25))
   }
   throw new PlaybackServiceError("mpv IPC socket did not become ready")
+}
+
+type AudioRoute = {
+  sinkName: string
+  monitorSource: string
+  sinkModuleId: string | null
+  loopbackModuleId: string | null
+}
+
+async function createAudioRoute(sessionId: string): Promise<AudioRoute | null> {
+  if (process.platform !== "linux") {
+    return null
+  }
+
+  const sinkName = `ytui_${sessionId.replace(/-/g, "")}`
+  let sinkModuleId: string | null = null
+  let loopbackModuleId: string | null = null
+
+  try {
+    sinkModuleId = await runPactl(["load-module", "module-null-sink", `sink_name=${sinkName}`])
+    if (!sinkModuleId) {
+      return null
+    }
+
+    const defaultSink = (await runPactl(["get-default-sink"])) || "@DEFAULT_SINK@"
+    loopbackModuleId =
+      (await runPactl(["load-module", "module-loopback", `source=${sinkName}.monitor`, `sink=${defaultSink}`, "latency_msec=60"])) || null
+
+    return {
+      sinkName,
+      monitorSource: `${sinkName}.monitor`,
+      sinkModuleId,
+      loopbackModuleId,
+    }
+  } catch {
+    if (loopbackModuleId) {
+      await unloadModule(loopbackModuleId)
+    }
+    if (sinkModuleId) {
+      await unloadModule(sinkModuleId)
+    }
+    return null
+  }
+}
+
+async function unloadModule(id: string): Promise<void> {
+  try {
+    await runPactl(["unload-module", id])
+  } catch {
+    // best effort cleanup
+  }
+}
+
+function runPactl(args: string[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execFile("pactl", args, { encoding: "utf8" }, (error, stdout) => {
+      if (error) {
+        reject(error)
+        return
+      }
+
+      resolve(stdout.trim())
+    })
+  })
 }

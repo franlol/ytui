@@ -1,4 +1,7 @@
 export type VisualizerState = {
-  phase: number
-  lines: string[]
+  bars: number[]
+  running: boolean
+  unavailable: boolean
+  error: string | null
+  sessionId: string | null
 }
