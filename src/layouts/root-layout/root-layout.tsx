@@ -27,6 +27,7 @@ export function RootLayout(props: RootLayoutProps) {
           theme={theme}
           progressStyleRegistry={props.progressStyleRegistry}
           visualizerStyleRegistry={props.visualizerStyleRegistry}
+          onSeekPlayback={props.onSeekPlayback}
         />
       )}
       <Statusline

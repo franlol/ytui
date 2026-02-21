@@ -11,6 +11,7 @@ export interface PlaybackService {
   play(source: PlaybackSource): Promise<PlaybackSession>
   pause(): Promise<void>
   resume(): Promise<void>
+  seekTo(seconds: number): Promise<void>
   stop(): Promise<void>
   getCurrentSession(): PlaybackSession | null
 }

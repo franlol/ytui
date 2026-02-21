@@ -109,6 +109,11 @@ export class MpvPlaybackService implements PlaybackService {
     await this.sendCommand(["set_property", "pause", false])
   }
 
+  async seekTo(seconds: number): Promise<void> {
+    const target = Math.max(0, Math.round(seconds))
+    await this.sendCommand(["seek", target, "absolute"])
+  }
+
   async stop(): Promise<void> {
     if (!this.process) {
       await this.cleanupSocketFile()

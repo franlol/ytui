@@ -61,6 +61,7 @@ export function MainLayout(props: MainLayoutProps) {
           progressRegistry={props.progressStyleRegistry}
           theme={props.theme}
           width={contentWidth}
+          onSeekPlayback={props.onSeekPlayback}
         />
         {props.state.settings.cavaEnabled ? (
           <CavaPanel

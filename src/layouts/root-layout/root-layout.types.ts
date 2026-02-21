@@ -10,4 +10,5 @@ export type RootLayoutProps = {
   themeRegistry: ThemeRegistry
   progressStyleRegistry: ProgressStyleRegistry
   visualizerStyleRegistry: VisualizerStyleRegistry
+  onSeekPlayback: (targetSec: number) => void
 }

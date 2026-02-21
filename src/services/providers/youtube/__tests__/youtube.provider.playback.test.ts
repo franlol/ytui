@@ -22,6 +22,7 @@ describe("youtube provider playback", () => {
       },
       pause: async () => {},
       resume: async () => {},
+      seekTo: async () => {},
       stop: async () => {},
       getCurrentSession: () => ({ id: "session-1", visualizerSource: "ytui_session.monitor" }),
     }

@@ -67,3 +67,35 @@ export const runTogglePauseResumeThunk = createAsyncThunk<void, void, { state: R
     }
   },
 )
+
+export const runSeekPlaybackThunk = createAsyncThunk<void, { targetSec: number }, { state: RootState; extra: AppServices }>(
+  "playback/seek",
+  async ({ targetSec }, { dispatch, getState, extra }) => {
+    const state = getState()
+    const provider = extra.providerManager.getActive()
+
+    if (!state.playback.nowPlaying) {
+      return
+    }
+
+    if (!provider?.playback) {
+      dispatch(uiActions.setStatus({ message: "ERR: provider has no playback capability", level: "err" }))
+      return
+    }
+
+    if (!provider.playback.seekTo) {
+      dispatch(uiActions.setStatus({ message: "ERR: seek not supported by provider", level: "err" }))
+      return
+    }
+
+    const clampedTargetSec = Math.max(0, Math.min(state.playback.durationSec, Math.round(targetSec)))
+
+    try {
+      await provider.playback.seekTo(clampedTargetSec)
+      dispatch(playbackActions.setElapsedSec(clampedTargetSec))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Seek failed"
+      dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
+    }
+  },
+)

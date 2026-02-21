@@ -30,6 +30,7 @@ export function HelpModal(props: HelpModalProps) {
       <text content="Enter (NORMAL): play selected queue track" fg={props.theme.text} />
       <text content="Ctrl+P (SEARCH): play selected result" fg={props.theme.text} />
       <text content="Space: pause/resume current track" fg={props.theme.text} />
+      <text content="Click NOW PLAYING bar: seek" fg={props.theme.text} />
       <text content="Close help: Esc / q / Enter" fg={props.theme.muted} />
     </box>
   )

@@ -12,6 +12,7 @@ metadata:
 - Checks provider manager orchestration correctness.
 - Verifies external provider integrations (for example `yt-dlp`) are hidden behind typed service adapters.
 - Verifies playback actions are routed through provider playback capabilities rather than direct UI-controlled process calls.
+- Verifies playback seek actions are routed through provider playback capabilities rather than direct UI-controlled process calls.
 - Verifies provider playback uses reusable typed playback-service adapters for future provider scalability.
 
 ## When to use

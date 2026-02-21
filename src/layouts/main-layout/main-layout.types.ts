@@ -10,4 +10,5 @@ export type MainLayoutProps = {
   theme: ThemeTokens
   progressStyleRegistry: ProgressStyleRegistry
   visualizerStyleRegistry: VisualizerStyleRegistry
+  onSeekPlayback: (targetSec: number) => void
 }

@@ -9,6 +9,7 @@ export interface PlaybackCapability {
   play(track: Track): Promise<void>
   pause(): Promise<void>
   resume(): Promise<void>
+  seekTo?(seconds: number): Promise<void>
   stop(): Promise<void>
   getPlaybackSession?(): PlaybackSession | null
 }

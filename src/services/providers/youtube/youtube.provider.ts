@@ -129,6 +129,9 @@ export class YoutubeProvider implements MusicProvider {
     resume: async () => {
       await this.playbackService.resume()
     },
+    seekTo: async (seconds: number) => {
+      await this.playbackService.seekTo(seconds)
+    },
     stop: async () => {
       await this.playbackService.stop()
     },

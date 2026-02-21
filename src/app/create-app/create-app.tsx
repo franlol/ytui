@@ -78,6 +78,7 @@ export async function createApp(): Promise<AppRuntime> {
 
   const renderer = await createCliRenderer({
     exitOnCtrlC: true,
+    useMouse: true,
     useAlternateScreen: config.useAlternateScreen,
   })
 

@@ -25,6 +25,7 @@ Enforce provider-capability architecture.
 - capability checks before feature use
 - external provider integrations (for example `yt-dlp`) are wrapped by typed services, not called from UI/thunks directly
 - playback controls (play/pause/resume/stop) are invoked through provider capability contracts, not directly from UI components
+- playback seeking is invoked through provider capability contracts (no direct UI process control)
 - provider playback implementations use typed playback services (for example `MpvPlaybackService`) so additional providers can reuse engine adapters
 
 ## Blocking Criteria

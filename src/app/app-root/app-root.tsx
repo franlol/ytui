@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { parseCommandInput } from "../../features/commands/command-parser/command-parser"
 import { playbackActions } from "../../features/playback/playback.slice"
-import { runPlayTrackThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
+import { runPlayTrackThunk, runSeekPlaybackThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
 import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
@@ -93,6 +93,13 @@ export function AppRoot(props: AppRootProps) {
 
     dispatch(uiActions.setStatus({ message: "INFO: queue is empty", level: "info" }))
   }, [dispatch, state.queue.selectedIndex, state.queue.tracks, state.search.results, state.search.selectedIndex, state.ui.mode])
+
+  const seekPlayback = useCallback(
+    (targetSec: number) => {
+      dispatch(runSeekPlaybackThunk({ targetSec }))
+    },
+    [dispatch],
+  )
 
   useKeyboard(
     (key) => {
@@ -209,6 +216,7 @@ export function AppRoot(props: AppRootProps) {
       themeRegistry={props.themeRegistry}
       progressStyleRegistry={props.progressStyleRegistry}
       visualizerStyleRegistry={props.visualizerStyleRegistry}
+      onSeekPlayback={seekPlayback}
     />
   )
 }

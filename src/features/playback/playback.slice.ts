@@ -34,6 +34,9 @@ export const playbackSlice = createSlice({
       }
       state.elapsedSec = Math.min(state.durationSec, state.elapsedSec + 1)
     },
+    setElapsedSec(state, action: PayloadAction<number>) {
+      state.elapsedSec = Math.max(0, Math.min(state.durationSec, Math.round(action.payload)))
+    },
     setVolume(state, action: PayloadAction<number>) {
       state.volume = Math.max(0, Math.min(100, action.payload))
     },

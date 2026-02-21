@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { createAppStore } from "../../../state/store/store"
 import { uiActions } from "../../ui/ui.slice"
 import { playbackActions } from "../playback.slice"
-import { runPlayTrackThunk, runTogglePauseResumeThunk } from "../playback.thunks"
+import { runPlayTrackThunk, runSeekPlaybackThunk, runTogglePauseResumeThunk } from "../playback.thunks"
 import type { AppServices } from "../../../state/store/store.types"
 import type { MusicProvider } from "../../../services/providers/provider.types"
 import type { Track } from "../../../types/app.types"
@@ -146,5 +146,57 @@ describe("playback thunks", () => {
 
     store.dispatch(uiActions.clearStatus())
     expect(store.getState().ui.statusMessage).toBeNull()
+  })
+
+  it("seeks when provider playback supports seekTo", async () => {
+    let seekTarget = -1
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        seekTo: async (seconds) => {
+          seekTarget = seconds
+        },
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    await store.dispatch(runSeekPlaybackThunk({ targetSec: 73 }))
+
+    expect(seekTarget).toBe(73)
+    expect(store.getState().playback.elapsedSec).toBe(73)
+  })
+
+  it("shows error when provider playback does not support seek", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    await store.dispatch(runSeekPlaybackThunk({ targetSec: 30 }))
+
+    expect(store.getState().ui.statusLevel).toBe("err")
+    expect(store.getState().ui.statusMessage).toBe("ERR: seek not supported by provider")
   })
 })

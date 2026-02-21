@@ -10,4 +10,5 @@ export type NowPlayingProps = {
   progressRegistry: ProgressStyleRegistry
   theme: ThemeTokens
   width: number
+  onSeekPlayback: (targetSec: number) => void
 }
