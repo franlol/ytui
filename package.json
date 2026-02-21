@@ -1,0 +1,13 @@
+{
+  "name": "ytui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "check:docs-sync": "bun run scripts/check-docs-sync.ts"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.1.80",
+    "@reduxjs/toolkit": "^2.11.2"
+  }
+}
