@@ -23,6 +23,8 @@ Protect MVP UX consistency.
 - help remains modal via `:?`
 - sidebar controlled by command
 - statusline behavior remains Vim-like
+- statusline feedback uses normalized severity prefixes (`OK:`, `ERR:`, `INFO:`) without duplicate labels
+- statusline feedback color follows severity semantics with safe fallback behavior for themes without explicit severity tokens
 - results/queue lists are viewport-safe (no overflow beyond panel height)
 - SEARCH, NOW PLAYING, and CAVA panels keep fixed heights while results/queue consume remaining space
 - NOW PLAYING renders title, author, and time+progress on separate lines without content overlap

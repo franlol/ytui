@@ -8,4 +8,6 @@ export type QueueListProps = {
   widthCols: number
   tracks: Track[]
   selectedIndex: number
+  nowPlayingTrackId?: string
+  runtimeDurationSec?: number
 }

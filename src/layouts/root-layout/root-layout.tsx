@@ -35,6 +35,7 @@ export function RootLayout(props: RootLayoutProps) {
         commandActive={props.state.ui.commandActive}
         commandBuffer={props.state.ui.commandBuffer}
         statusMessage={props.state.ui.statusMessage}
+        statusLevel={props.state.ui.statusLevel}
         queueLength={props.state.queue.tracks.length}
         volume={props.state.playback.volume}
         sidebarCollapsed={props.state.ui.sidebarCollapsed}

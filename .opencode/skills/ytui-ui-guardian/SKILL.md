@@ -10,6 +10,8 @@ metadata:
 - Verifies required views and transitions.
 - Ensures command mode and help modal behavior remain coherent.
 - Flags user-visible regressions.
+- Verifies statusline severity text is normalized to `OK:`, `ERR:`, `INFO:` without duplicate prefixes.
+- Verifies statusline severity colors resolve automatically with safe fallbacks when themes omit explicit severity tokens.
 - Verifies list panels remain viewport-safe and do not overflow container bounds.
 - Verifies fixed-height panel constraints for SEARCH, NOW PLAYING, and CAVA with results/queue filling remaining space.
 - Verifies NOW PLAYING title, author, and time+progress lines remain width-safe and non-overlapping.
