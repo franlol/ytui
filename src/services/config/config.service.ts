@@ -11,6 +11,7 @@ const DEFAULT_CONFIG: AppConfig = {
   theme: "gruvbox",
   progressStyle: "blocks",
   cavaStyle: "blocks",
+  cavaSourceMode: "ytui-strict",
   sidebar: "on",
   defaultMode: "normal",
   resultsLimit: 20,
@@ -93,11 +94,18 @@ function parseConfig(raw: string): Partial<AppConfig> {
     entries[key] = value
   }
 
+  const sourceMode = entries.CAVA_SOURCE_MODE
+  const cavaSourceMode =
+    sourceMode === "ytui-strict" || sourceMode === "ytui-best-effort" || sourceMode === "system"
+      ? sourceMode
+      : DEFAULT_CONFIG.cavaSourceMode
+
   return {
     configVersion: parseInteger(entries.CONFIG_VERSION, DEFAULT_CONFIG.configVersion, 1, 999),
     theme: entries.THEME ?? DEFAULT_CONFIG.theme,
     progressStyle: entries.PROGRESS_STYLE ?? DEFAULT_CONFIG.progressStyle,
     cavaStyle: entries.CAVA_STYLE ?? DEFAULT_CONFIG.cavaStyle,
+    cavaSourceMode,
     sidebar: entries.SIDEBAR === "off" ? "off" : "on",
     defaultMode: entries.DEFAULT_MODE === "search" || entries.DEFAULT_MODE === "zen" ? entries.DEFAULT_MODE : "normal",
     resultsLimit: parseInteger(entries.RESULTS_LIMIT, DEFAULT_CONFIG.resultsLimit, 1, 100),
@@ -119,6 +127,7 @@ function stringifyConfig(config: AppConfig): string {
     `THEME=\"${config.theme}\"`,
     `PROGRESS_STYLE=\"${config.progressStyle}\"`,
     `CAVA_STYLE=\"${config.cavaStyle}\"`,
+    `CAVA_SOURCE_MODE=\"${config.cavaSourceMode}\"`,
     `SIDEBAR=\"${config.sidebar}\"`,
     `DEFAULT_MODE=\"${config.defaultMode}\"`,
     `RESULTS_LIMIT=\"${config.resultsLimit}\"`,

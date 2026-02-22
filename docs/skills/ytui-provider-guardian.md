@@ -27,6 +27,7 @@ Enforce provider-capability architecture.
 - playback controls (play/pause/resume/stop) are invoked through provider capability contracts, not directly from UI components
 - playback seeking is invoked through provider capability contracts (no direct UI process control)
 - provider playback implementations use typed playback services (for example `MpvPlaybackService`) so additional providers can reuse engine adapters
+- visualizer source routing modes preserve provider-scoped behavior by default (`ytui-strict`) and only enter global-audio behavior when explicitly set to `system`
 
 ## Blocking Criteria
 

@@ -21,6 +21,7 @@ metadata:
 - Verifies statusline preserves left mode/command context while feedback messages render in a side slot.
 - Verifies visualizer behavior stays scoped to active ytui playback session and unsupported runtime paths degrade gracefully.
 - Verifies visualizer glyph style behavior remains registry-driven with deterministic fallback for unknown style ids.
+- Verifies visualizer source-mode UX is explicit (`ytui-strict`, `ytui-best-effort`, `system`) with correct warning/disable behavior.
 
 ## When to use
 

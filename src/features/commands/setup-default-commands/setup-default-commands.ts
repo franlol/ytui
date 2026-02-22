@@ -5,6 +5,8 @@ import { uiActions } from "../../ui/ui.slice"
 import type { CommandRegistry } from "../../../registries/commands/command.registry"
 
 export function setupDefaultCommands(commandRegistry: CommandRegistry) {
+  const cavaSourceModes = ["ytui-strict", "ytui-best-effort", "system"] as const
+
   commandRegistry.register({
     name: "q",
     description: "Quit application",
@@ -145,7 +147,28 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
         return
       }
 
-      context.dispatch(uiActions.setStatus({ message: "ERR: use :cava style list|<id>", level: "err" }))
+      if (action === "source") {
+        const value = args[1]
+
+        if (!value || value === "list") {
+          const current = context.getState().settings.cavaSourceMode
+          context.dispatch(
+            uiActions.setStatus({ message: `INFO: current=${current} | available=${cavaSourceModes.join("|")}`, level: "info" }),
+          )
+          return
+        }
+
+        if (cavaSourceModes.includes(value as (typeof cavaSourceModes)[number])) {
+          context.dispatch(settingsActions.setCavaSourceMode(value as (typeof cavaSourceModes)[number]))
+          context.dispatch(uiActions.setStatus({ message: `OK: cava source ${value}`, level: "ok" }))
+          return
+        }
+
+        context.dispatch(uiActions.setStatus({ message: `ERR: use :cava source list|${cavaSourceModes.join("|")}`, level: "err" }))
+        return
+      }
+
+      context.dispatch(uiActions.setStatus({ message: "ERR: use :cava style list|<id> OR :cava source list|<mode>", level: "err" }))
     },
   })
 

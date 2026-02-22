@@ -7,6 +7,7 @@ const initialState: SettingsState = {
   themeId: "gruvbox",
   progressStyleId: "blocks",
   cavaStyleId: "blocks",
+  cavaSourceMode: "ytui-strict",
   resultsLimit: 20,
   cavaEnabled: true,
   cavaHeight: 2,
@@ -23,6 +24,7 @@ export const settingsSlice = createSlice({
       state.themeId = action.payload.theme
       state.progressStyleId = action.payload.progressStyle
       state.cavaStyleId = action.payload.cavaStyle
+      state.cavaSourceMode = action.payload.cavaSourceMode
       state.resultsLimit = action.payload.resultsLimit
       state.cavaEnabled = action.payload.cavaEnabled
       state.cavaHeight = action.payload.cavaHeight
@@ -38,6 +40,9 @@ export const settingsSlice = createSlice({
     },
     setCavaStyle(state, action: PayloadAction<string>) {
       state.cavaStyleId = action.payload
+    },
+    setCavaSourceMode(state, action: PayloadAction<"ytui-strict" | "ytui-best-effort" | "system">) {
+      state.cavaSourceMode = action.payload
     },
     setDefaultMode(state, action: PayloadAction<Mode>) {
       state.defaultMode = action.payload

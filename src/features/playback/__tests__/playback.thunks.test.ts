@@ -67,6 +67,7 @@ function makeServices(provider: MusicProvider): AppServices {
 describe("playback thunks", () => {
   it("plays selected track via provider playback capability", async () => {
     let playedId = ""
+    let mode: string | undefined
     const services = makeServices({
       info: {
         id: "youtube",
@@ -75,8 +76,9 @@ describe("playback thunks", () => {
         capabilities: { search: true, playback: true, auth: false, library: false },
       },
       playback: {
-        play: async (input) => {
+        play: async (input, options) => {
           playedId = input.id
+          mode = options?.cavaSourceMode
         },
         pause: async () => {},
         resume: async () => {},
@@ -89,6 +91,7 @@ describe("playback thunks", () => {
 
     const state = store.getState()
     expect(playedId).toBe(track.id)
+    expect(mode).toBe("ytui-strict")
     expect(state.playback.nowPlaying?.id).toBe(track.id)
     expect(state.playback.playing).toBe(true)
   })

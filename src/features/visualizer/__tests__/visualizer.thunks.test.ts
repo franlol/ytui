@@ -58,7 +58,14 @@ describe("visualizer thunks", () => {
     const { services, emitFrame } = makeServices()
     const { store } = createAppStore(services)
 
-    await store.dispatch(runStartVisualizerThunk({ id: "s1", visualizerSource: "ytui_s1.monitor" }))
+    await store.dispatch(
+      runStartVisualizerThunk({
+        id: "s1",
+        visualizerSource: "ytui_s1.monitor",
+        visualizerSourceMode: "ytui-strict",
+        visualizerSourceVerified: true,
+      }),
+    )
     emitFrame([1, 4, 7])
 
     const state = store.getState().visualizer
@@ -71,12 +78,37 @@ describe("visualizer thunks", () => {
     const { services } = makeServices()
     const { store } = createAppStore(services)
 
-    await store.dispatch(runStartVisualizerThunk({ id: "s1", visualizerSource: "ytui_s1.monitor" }))
+    await store.dispatch(
+      runStartVisualizerThunk({
+        id: "s1",
+        visualizerSource: "ytui_s1.monitor",
+        visualizerSourceMode: "ytui-strict",
+        visualizerSourceVerified: true,
+      }),
+    )
     await store.dispatch(runStopVisualizerThunk())
 
     const state = store.getState().visualizer
     expect(state.running).toBe(false)
     expect(state.sessionId).toBeNull()
     expect(state.bars).toEqual([])
+  })
+
+  it("does not start visualizer when strict source is unverified", async () => {
+    const { services } = makeServices()
+    const { store } = createAppStore(services)
+
+    await store.dispatch(
+      runStartVisualizerThunk({
+        id: "s1",
+        visualizerSource: "ytui_s1.monitor",
+        visualizerSourceMode: "ytui-strict",
+        visualizerSourceVerified: false,
+      }),
+    )
+
+    const state = store.getState().visualizer
+    expect(state.running).toBe(false)
+    expect(state.unavailable).toBe(true)
   })
 })

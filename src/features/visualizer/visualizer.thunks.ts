@@ -21,6 +21,18 @@ export const runStartVisualizerThunk = createAsyncThunk<void, PlaybackSession, {
       return
     }
 
+    if (session.visualizerSourceMode === "ytui-strict" && !session.visualizerSourceVerified) {
+      dispatch(visualizerActions.setUnavailable(true))
+      dispatch(visualizerActions.setRunning(false))
+      dispatch(visualizerActions.setError("ytui-isolated source could not be verified"))
+      dispatch(uiActions.setStatus({ message: "INFO: visualizer disabled (ytui isolation check failed)", level: "info" }))
+      return
+    }
+
+    if (session.visualizerSourceMode === "ytui-best-effort" && !session.visualizerSourceVerified) {
+      dispatch(uiActions.setStatus({ message: "INFO: visualizer running in best-effort source mode", level: "info" }))
+    }
+
     dispatch(visualizerActions.setSession(session.id))
     dispatch(visualizerActions.setUnavailable(false))
     dispatch(visualizerActions.setRunning(true))

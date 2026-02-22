@@ -14,6 +14,7 @@ metadata:
 - Verifies playback actions are routed through provider playback capabilities rather than direct UI-controlled process calls.
 - Verifies playback seek actions are routed through provider playback capabilities rather than direct UI-controlled process calls.
 - Verifies provider playback uses reusable typed playback-service adapters for future provider scalability.
+- Verifies visualizer source routing defaults to provider-scoped isolation and only uses global/system routing when explicitly configured.
 
 ## When to use
 

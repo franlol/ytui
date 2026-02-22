@@ -7,8 +7,9 @@ import type { Track } from "../../types/app.types"
 
 export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootState; extra: AppServices }>(
   "playback/play-track",
-  async (track, { dispatch, extra }) => {
+  async (track, { dispatch, getState, extra }) => {
     const provider = extra.providerManager.getActive()
+    const state = getState()
 
     if (!provider?.playback) {
       dispatch(uiActions.setStatus({ message: "ERR: provider has no playback capability", level: "err" }))
@@ -17,7 +18,7 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
 
     try {
       await dispatch(runStopVisualizerThunk())
-      await provider.playback.play(track)
+      await provider.playback.play(track, { cavaSourceMode: state.settings.cavaSourceMode })
       dispatch(playbackActions.setNowPlaying(track))
       dispatch(playbackActions.setPlaying(true))
 

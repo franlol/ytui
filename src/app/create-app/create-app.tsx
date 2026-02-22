@@ -92,6 +92,7 @@ export async function createApp(): Promise<AppRuntime> {
       theme: current.settings.themeId,
       progressStyle: current.settings.progressStyleId,
       cavaStyle: current.settings.cavaStyleId,
+      cavaSourceMode: current.settings.cavaSourceMode,
       sidebar: current.ui.sidebarCollapsed ? "off" : "on",
       defaultMode: current.settings.defaultMode,
       resultsLimit: current.settings.resultsLimit,

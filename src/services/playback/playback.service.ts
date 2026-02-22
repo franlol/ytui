@@ -5,7 +5,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { Socket } from "node:net"
 import { execFile, spawn, type ChildProcess } from "node:child_process"
-import type { PlaybackService, PlaybackSession, PlaybackSource } from "./playback.service.types"
+import type { CavaSourceMode, PlaybackService, PlaybackSession, PlaybackSource } from "./playback.service.types"
 
 const DEFAULT_TIMEOUT_MS = 10000
 
@@ -28,14 +28,15 @@ export class MpvPlaybackService implements PlaybackService {
     await this.stop()
 
     const sessionId = randomUUID()
-    this.currentRoute = await createAudioRoute(sessionId)
+    const mode = source.cavaSourceMode ?? "ytui-strict"
+    this.currentRoute = await createAudioRoute(sessionId, mode)
 
     const ipcPath = join(tmpdir(), `ytui-mpv-${process.pid}-${randomUUID()}.sock`)
     const args = [
       "--no-video",
       "--really-quiet",
       `--input-ipc-server=${ipcPath}`,
-      ...(this.currentRoute ? [`--audio-device=pulse/${this.currentRoute.sinkName}`] : []),
+      ...(this.currentRoute?.sinkName ? [`--audio-device=pulse/${this.currentRoute.sinkName}`] : []),
       source.url,
     ]
 
@@ -82,6 +83,8 @@ export class MpvPlaybackService implements PlaybackService {
     this.currentSession = {
       id: sessionId,
       visualizerSource: this.currentRoute?.monitorSource ?? null,
+      visualizerSourceMode: mode,
+      visualizerSourceVerified: this.currentRoute?.verified ?? false,
     }
 
     try {
@@ -296,36 +299,54 @@ async function waitForFile(path: string, timeoutMs: number): Promise<void> {
 }
 
 type AudioRoute = {
-  sinkName: string
-  monitorSource: string
+  sinkName: string | null
+  monitorSource: string | null
   sinkModuleId: string | null
   loopbackModuleId: string | null
+  verified: boolean
 }
 
-async function createAudioRoute(sessionId: string): Promise<AudioRoute | null> {
+async function createAudioRoute(sessionId: string, mode: CavaSourceMode): Promise<AudioRoute | null> {
   if (process.platform !== "linux") {
     return null
+  }
+
+  if (mode === "system") {
+    return await createSystemRoute()
   }
 
   const sinkName = `ytui_${sessionId.replace(/-/g, "")}`
   let sinkModuleId: string | null = null
   let loopbackModuleId: string | null = null
+  const defaultSink = (await runPactl(["get-default-sink"]).catch(() => "")) || ""
 
   try {
     sinkModuleId = await runPactl(["load-module", "module-null-sink", `sink_name=${sinkName}`])
     if (!sinkModuleId) {
-      return null
+      return mode === "ytui-best-effort" ? await createSystemRoute(false) : null
     }
 
-    const defaultSink = (await runPactl(["get-default-sink"])) || "@DEFAULT_SINK@"
+    const loopbackTarget = defaultSink || "@DEFAULT_SINK@"
     loopbackModuleId =
-      (await runPactl(["load-module", "module-loopback", `source=${sinkName}.monitor`, `sink=${defaultSink}`, "latency_msec=60"])) || null
+      (await runPactl(["load-module", "module-loopback", `source=${sinkName}.monitor`, `sink=${loopbackTarget}`, "latency_msec=60"])) || null
+
+    const verified = Boolean(defaultSink) && defaultSink !== sinkName && Boolean(loopbackModuleId)
+    if (mode === "ytui-strict" && !verified) {
+      if (loopbackModuleId) {
+        await unloadModule(loopbackModuleId)
+      }
+      if (sinkModuleId) {
+        await unloadModule(sinkModuleId)
+      }
+      return null
+    }
 
     return {
       sinkName,
       monitorSource: `${sinkName}.monitor`,
       sinkModuleId,
       loopbackModuleId,
+      verified,
     }
   } catch {
     if (loopbackModuleId) {
@@ -334,7 +355,22 @@ async function createAudioRoute(sessionId: string): Promise<AudioRoute | null> {
     if (sinkModuleId) {
       await unloadModule(sinkModuleId)
     }
+    return mode === "ytui-best-effort" ? await createSystemRoute(false) : null
+  }
+}
+
+async function createSystemRoute(verified = true): Promise<AudioRoute | null> {
+  const defaultSource = (await runPactl(["get-default-source"]).catch(() => "")) || null
+  if (!defaultSource) {
     return null
+  }
+
+  return {
+    sinkName: null,
+    monitorSource: defaultSource,
+    sinkModuleId: null,
+    loopbackModuleId: null,
+    verified,
   }
 }
 

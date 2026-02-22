@@ -24,6 +24,7 @@ export function HelpModal(props: HelpModalProps) {
       <text content="Esc: back to normal" fg={props.theme.text} />
       <text content=":sidebar toggle|on|off" fg={props.theme.text} />
       <text content=":progress list | :progress <style>" fg={props.theme.text} />
+      <text content=":cava style list|<id> | :cava source list|<mode>" fg={props.theme.text} />
       <text content=":theme list | :theme <name>" fg={props.theme.text} />
       <text content=":provider list|current|use <id>" fg={props.theme.text} />
       <text content=":plugin list|info <id>|reload" fg={props.theme.text} />

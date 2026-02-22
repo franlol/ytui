@@ -18,13 +18,23 @@ describe("youtube provider playback", () => {
     const playbackService: PlaybackService = {
       play: async (source) => {
         playedUrl = source.url
-        return { id: "session-1", visualizerSource: "ytui_session.monitor" }
+        return {
+          id: "session-1",
+          visualizerSource: "ytui_session.monitor",
+          visualizerSourceMode: "ytui-strict",
+          visualizerSourceVerified: true,
+        }
       },
       pause: async () => {},
       resume: async () => {},
       seekTo: async () => {},
       stop: async () => {},
-      getCurrentSession: () => ({ id: "session-1", visualizerSource: "ytui_session.monitor" }),
+      getCurrentSession: () => ({
+        id: "session-1",
+        visualizerSource: "ytui_session.monitor",
+        visualizerSourceMode: "ytui-strict",
+        visualizerSourceVerified: true,
+      }),
     }
 
     const provider = new YoutubeProvider({ playbackService })

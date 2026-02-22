@@ -3,7 +3,7 @@ import { PlaybackServiceError, MpvPlaybackService } from "../../playback/playbac
 import type { PlaybackService } from "../../playback/playback.service.types"
 import { YtDlpSearchService } from "../../search/search.service"
 import type { SearchService } from "../../search/search.service.types"
-import type { MusicProvider } from "../provider.types"
+import type { MusicProvider, PlaybackRequestOptions } from "../provider.types"
 import type { YoutubeProviderCatalog } from "./youtube.provider.types"
 
 const defaultCatalog: Track[] = [
@@ -119,9 +119,9 @@ export class YoutubeProvider implements MusicProvider {
   }
 
   playback = {
-    play: async (track: Track) => {
+    play: async (track: Track, options?: PlaybackRequestOptions) => {
       const sourceUrl = resolveYoutubeTrackUrl(track)
-      await this.playbackService.play({ url: sourceUrl })
+      await this.playbackService.play({ url: sourceUrl, cavaSourceMode: options?.cavaSourceMode })
     },
     pause: async () => {
       await this.playbackService.pause()

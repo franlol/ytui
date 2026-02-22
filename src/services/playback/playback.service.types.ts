@@ -1,10 +1,15 @@
+export type CavaSourceMode = "ytui-strict" | "ytui-best-effort" | "system"
+
 export type PlaybackSource = {
   url: string
+  cavaSourceMode?: CavaSourceMode
 }
 
 export type PlaybackSession = {
   id: string
   visualizerSource: string | null
+  visualizerSourceMode: CavaSourceMode
+  visualizerSourceVerified: boolean
 }
 
 export interface PlaybackService {
