@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { createAppStore } from "../../../state/store/store"
 import { uiActions } from "../../ui/ui.slice"
 import { playbackActions } from "../playback.slice"
-import { runPlayTrackThunk, runSeekPlaybackThunk, runTogglePauseResumeThunk } from "../playback.thunks"
+import { runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, runTogglePauseResumeThunk } from "../playback.thunks"
 import type { AppServices } from "../../../state/store/store.types"
 import type { MusicProvider } from "../../../services/providers/provider.types"
 import type { Track } from "../../../types/app.types"
@@ -201,5 +201,62 @@ describe("playback thunks", () => {
 
     expect(store.getState().ui.statusLevel).toBe("err")
     expect(store.getState().ui.statusMessage).toBe("ERR: seek not supported by provider")
+  })
+
+  it("syncs runtime progress from provider playback", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 192, durationSec: 245, paused: false, available: true }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    store.dispatch(playbackActions.setPlaying(true))
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    const state = store.getState().playback
+    expect(state.elapsedSec).toBe(192)
+    expect(state.durationSec).toBe(245)
+    expect(state.playing).toBe(true)
+  })
+
+  it("falls back to tick when runtime sync is unavailable repeatedly", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 0, durationSec: null, paused: false, available: false }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    store.dispatch(playbackActions.setPlaying(true))
+    await store.dispatch(runSyncPlaybackProgressThunk())
+    await store.dispatch(runSyncPlaybackProgressThunk())
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    const state = store.getState().playback
+    expect(state.elapsedSec).toBe(1)
+    expect(state.syncMisses).toBe(3)
   })
 })

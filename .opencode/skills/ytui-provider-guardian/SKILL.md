@@ -13,6 +13,7 @@ metadata:
 - Verifies external provider integrations (for example `yt-dlp`) are hidden behind typed service adapters.
 - Verifies playback actions are routed through provider playback capabilities rather than direct UI-controlled process calls.
 - Verifies playback seek actions are routed through provider playback capabilities rather than direct UI-controlled process calls.
+- Verifies playback progress telemetry is routed through provider playback capabilities rather than direct UI-controlled process reads.
 - Verifies provider playback uses reusable typed playback-service adapters for future provider scalability.
 - Verifies visualizer source routing defaults to provider-scoped isolation and only uses global/system routing when explicitly configured.
 

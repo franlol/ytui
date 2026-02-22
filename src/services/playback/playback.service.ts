@@ -5,7 +5,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { Socket } from "node:net"
 import { execFile, spawn, type ChildProcess } from "node:child_process"
-import type { CavaSourceMode, PlaybackService, PlaybackSession, PlaybackSource } from "./playback.service.types"
+import type { CavaSourceMode, PlaybackProgress, PlaybackService, PlaybackSession, PlaybackSource } from "./playback.service.types"
 
 const DEFAULT_TIMEOUT_MS = 10000
 
@@ -115,6 +115,40 @@ export class MpvPlaybackService implements PlaybackService {
   async seekTo(seconds: number): Promise<void> {
     const target = Math.max(0, Math.round(seconds))
     await this.sendCommand(["seek", target, "absolute"])
+  }
+
+  async getProgress(): Promise<PlaybackProgress> {
+    if (!this.process || !this.ipcPath) {
+      return {
+        elapsedSec: 0,
+        durationSec: null,
+        paused: true,
+        available: false,
+      }
+    }
+
+    try {
+      const elapsed = await this.getProperty<number>("time-pos")
+      const duration = await this.getProperty<number>("duration")
+      const paused = await this.getProperty<boolean>("pause")
+
+      const elapsedSec = typeof elapsed === "number" && Number.isFinite(elapsed) ? Math.max(0, Math.floor(elapsed)) : 0
+      const durationSec = typeof duration === "number" && Number.isFinite(duration) ? Math.max(1, Math.floor(duration)) : null
+
+      return {
+        elapsedSec,
+        durationSec,
+        paused: Boolean(paused),
+        available: typeof elapsed === "number" && Number.isFinite(elapsed),
+      }
+    } catch {
+      return {
+        elapsedSec: 0,
+        durationSec: null,
+        paused: true,
+        available: false,
+      }
+    }
   }
 
   async stop(): Promise<void> {

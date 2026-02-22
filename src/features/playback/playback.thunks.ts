@@ -100,3 +100,40 @@ export const runSeekPlaybackThunk = createAsyncThunk<void, { targetSec: number }
     }
   },
 )
+
+export const runSyncPlaybackProgressThunk = createAsyncThunk<void, void, { state: RootState; extra: AppServices }>(
+  "playback/sync-progress",
+  async (_payload, { dispatch, getState, extra }) => {
+    const state = getState()
+    if (!state.playback.nowPlaying) {
+      return
+    }
+
+    const provider = extra.providerManager.getActive()
+    const playback = provider?.playback
+    if (!playback) {
+      return
+    }
+
+    if (!playback.getProgress) {
+      dispatch(playbackActions.tick())
+      return
+    }
+
+    try {
+      const progress = await playback.getProgress()
+      if (progress.available) {
+        dispatch(playbackActions.applyRuntimeProgress(progress))
+        return
+      }
+    } catch {
+      // runtime sync failed this tick; fallback below
+    }
+
+    const misses = state.playback.syncMisses + 1
+    dispatch(playbackActions.setSyncMisses(misses))
+    if (state.playback.playing && misses >= 3) {
+      dispatch(playbackActions.tick())
+    }
+  },
+)

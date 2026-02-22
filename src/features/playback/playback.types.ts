@@ -6,4 +6,5 @@ export type PlaybackState = {
   durationSec: number
   playing: boolean
   volume: number
+  syncMisses: number
 }

@@ -2,8 +2,7 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react"
 import { useCallback, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { parseCommandInput } from "../../features/commands/command-parser/command-parser"
-import { playbackActions } from "../../features/playback/playback.slice"
-import { runPlayTrackThunk, runSeekPlaybackThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
+import { runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
 import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
@@ -20,8 +19,8 @@ export function AppRoot(props: AppRootProps) {
 
   useEffect(() => {
     const frameTimer = setInterval(() => {
-      dispatch(playbackActions.tick())
-    }, 1000)
+      dispatch(runSyncPlaybackProgressThunk())
+    }, 750)
 
     return () => {
       clearInterval(frameTimer)

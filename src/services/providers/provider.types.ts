@@ -1,5 +1,5 @@
 import type { ProviderInfo, Track } from "../../types/app.types"
-import type { CavaSourceMode, PlaybackSession } from "../playback/playback.service.types"
+import type { CavaSourceMode, PlaybackProgress, PlaybackSession } from "../playback/playback.service.types"
 
 export type PlaybackRequestOptions = {
   cavaSourceMode?: CavaSourceMode
@@ -14,6 +14,7 @@ export interface PlaybackCapability {
   pause(): Promise<void>
   resume(): Promise<void>
   seekTo?(seconds: number): Promise<void>
+  getProgress?(): Promise<PlaybackProgress>
   stop(): Promise<void>
   getPlaybackSession?(): PlaybackSession | null
 }

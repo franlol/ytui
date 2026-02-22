@@ -132,6 +132,9 @@ export class YoutubeProvider implements MusicProvider {
     seekTo: async (seconds: number) => {
       await this.playbackService.seekTo(seconds)
     },
+    getProgress: async () => {
+      return await this.playbackService.getProgress()
+    },
     stop: async () => {
       await this.playbackService.stop()
     },

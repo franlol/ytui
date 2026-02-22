@@ -26,6 +26,7 @@ Protect MVP UX consistency.
 - results/queue lists are viewport-safe (no overflow beyond panel height)
 - SEARCH, NOW PLAYING, and CAVA panels keep fixed heights while results/queue consume remaining space
 - NOW PLAYING renders title, author, and time+progress on separate lines without content overlap
+- NOW PLAYING elapsed/duration reflects runtime playback state and must not freeze at stale metadata duration while audio continues
 - NOW PLAYING progress seek is click-only on the rendered bar region; timestamp/prefix clicks are ignored safely
 - on very small terminals, fixed panels remain visible first and results/queue may collapse when remaining height is below renderable minimum
 - SEARCH height budget accounts for border + padding so CAVA keeps a visible gap above statusline

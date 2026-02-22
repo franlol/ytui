@@ -26,5 +26,6 @@ UI runtime note:
 - CAVA source mode is command/config driven: `:cava source list` and `:cava source <mode>` where `<mode>` is `ytui-strict` (default), `ytui-best-effort`, or `system`.
 - `ytui-strict` disables visualizer when ytui-isolated source cannot be verified; `system` intentionally visualizes global system audio.
 - NOW PLAYING progress bar supports click-to-seek; clicks outside the rendered bar are ignored and provider backends without seek capability fail with a status error.
+- NOW PLAYING time/progress prefers runtime playback telemetry (`mpv` time-pos/duration via provider playback capability) and falls back to local tick updates only when runtime telemetry is unavailable.
 
 Start here, then read `docs/policies/agent-only-contributions.md`.
