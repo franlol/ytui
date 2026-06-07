@@ -38,6 +38,7 @@ Protect MVP UX consistency.
 - visualizer remains session-scoped to ytui playback (no global system-audio coupling) and unsupported runtime paths fail soft without UI crash
 - visualizer glyph rendering remains registry-driven with safe fallback style behavior when style ids are unknown
 - visualizer source-mode UX remains explicit: `ytui-strict` disables on failed isolation verification, `ytui-best-effort` warns, and `system` is opt-in global audio behavior
+- `vol:` in the statusline reflects live mpv volume synced via the 750 ms telemetry tick; it must not display a static initial value while a track is playing
 
 ## Blocking Criteria
 

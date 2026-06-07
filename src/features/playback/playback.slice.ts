@@ -41,7 +41,7 @@ export const playbackSlice = createSlice({
     },
     applyRuntimeProgress(
       state,
-      action: PayloadAction<{ elapsedSec: number; durationSec: number | null; paused: boolean; available: boolean }>,
+      action: PayloadAction<{ elapsedSec: number; durationSec: number | null; paused: boolean; available: boolean; volume: number | null }>,
     ) {
       const payload = action.payload
       if (!payload.available) {
@@ -55,6 +55,10 @@ export const playbackSlice = createSlice({
       state.elapsedSec = Math.max(0, Math.min(state.durationSec, Math.round(payload.elapsedSec)))
       state.playing = !payload.paused
       state.syncMisses = 0
+
+      if (payload.volume !== null) {
+        state.volume = Math.max(0, Math.min(100, Math.round(payload.volume)))
+      }
     },
     setSyncMisses(state, action: PayloadAction<number>) {
       state.syncMisses = Math.max(0, Math.round(action.payload))

@@ -28,7 +28,7 @@ describe("youtube provider playback", () => {
       pause: async () => {},
       resume: async () => {},
       seekTo: async () => {},
-      getProgress: async () => ({ elapsedSec: 0, durationSec: 180, paused: false, available: true }),
+      getProgress: async () => ({ elapsedSec: 0, durationSec: 180, paused: false, available: true, volume: null }),
       stop: async () => {},
       getCurrentSession: () => ({
         id: "session-1",

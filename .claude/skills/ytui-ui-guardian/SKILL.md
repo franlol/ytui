@@ -25,6 +25,7 @@ metadata:
 - Verifies visualizer behavior stays scoped to active ytui playback session and unsupported runtime paths degrade gracefully.
 - Verifies visualizer glyph style behavior remains registry-driven with deterministic fallback for unknown style ids.
 - Verifies visualizer source-mode UX is explicit (`ytui-strict`, `ytui-best-effort`, `system`) with correct warning/disable behavior.
+- Verifies statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick and does not display a static initial value during active playback.
 
 ## When to use
 

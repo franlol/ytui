@@ -17,6 +17,7 @@ export type PlaybackProgress = {
   durationSec: number | null
   paused: boolean
   available: boolean
+  volume: number | null
 }
 
 export interface PlaybackService {

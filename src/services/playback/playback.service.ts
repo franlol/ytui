@@ -124,13 +124,17 @@ export class MpvPlaybackService implements PlaybackService {
         durationSec: null,
         paused: true,
         available: false,
+        volume: null,
       }
     }
 
     try {
-      const elapsed = await this.getProperty<number>("time-pos")
-      const duration = await this.getProperty<number>("duration")
-      const paused = await this.getProperty<boolean>("pause")
+      const [elapsed, duration, paused, volume] = await Promise.all([
+        this.getProperty<number>("time-pos"),
+        this.getProperty<number>("duration"),
+        this.getProperty<boolean>("pause"),
+        readDefaultSinkVolume(),
+      ])
 
       const elapsedSec = typeof elapsed === "number" && Number.isFinite(elapsed) ? Math.max(0, Math.floor(elapsed)) : 0
       const durationSec = typeof duration === "number" && Number.isFinite(duration) ? Math.max(1, Math.floor(duration)) : null
@@ -140,6 +144,7 @@ export class MpvPlaybackService implements PlaybackService {
         durationSec,
         paused: Boolean(paused),
         available: typeof elapsed === "number" && Number.isFinite(elapsed),
+        volume,
       }
     } catch {
       return {
@@ -147,6 +152,7 @@ export class MpvPlaybackService implements PlaybackService {
         durationSec: null,
         paused: true,
         available: false,
+        volume: null,
       }
     }
   }
@@ -413,6 +419,23 @@ async function unloadModule(id: string): Promise<void> {
     await runPactl(["unload-module", id])
   } catch {
     // best effort cleanup
+  }
+}
+
+async function readDefaultSinkVolume(): Promise<number | null> {
+  if (process.platform !== "linux") {
+    return null
+  }
+
+  try {
+    const output = await runPactl(["get-sink-volume", "@DEFAULT_SINK@"])
+    const match = output.match(/\/\s*(\d+)%/)
+    if (!match) {
+      return null
+    }
+    return Math.max(0, Math.min(100, Number(match[1])))
+  } catch {
+    return null
   }
 }
 

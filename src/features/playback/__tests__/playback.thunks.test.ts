@@ -215,7 +215,7 @@ describe("playback thunks", () => {
         play: async () => {},
         pause: async () => {},
         resume: async () => {},
-        getProgress: async () => ({ elapsedSec: 192, durationSec: 245, paused: false, available: true }),
+        getProgress: async () => ({ elapsedSec: 192, durationSec: 245, paused: false, available: true, volume: 80 }),
         stop: async () => {},
       },
     })
@@ -229,6 +229,56 @@ describe("playback thunks", () => {
     expect(state.elapsedSec).toBe(192)
     expect(state.durationSec).toBe(245)
     expect(state.playing).toBe(true)
+    expect(state.volume).toBe(80)
+  })
+
+  it("syncs volume from runtime progress and clamps to 0-100", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 10, durationSec: 180, paused: false, available: true, volume: 130 }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    expect(store.getState().playback.volume).toBe(100)
+  })
+
+  it("preserves previous volume when runtime reports null", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 10, durationSec: 180, paused: false, available: true, volume: null }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    store.dispatch(playbackActions.setVolume(55))
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    expect(store.getState().playback.volume).toBe(55)
   })
 
   it("falls back to tick when runtime sync is unavailable repeatedly", async () => {
@@ -243,7 +293,7 @@ describe("playback thunks", () => {
         play: async () => {},
         pause: async () => {},
         resume: async () => {},
-        getProgress: async () => ({ elapsedSec: 0, durationSec: null, paused: false, available: false }),
+        getProgress: async () => ({ elapsedSec: 0, durationSec: null, paused: false, available: false, volume: null }),
         stop: async () => {},
       },
     })
