@@ -1,34 +1,31 @@
+import { Modal } from "../modal/modal"
 import { clampThemeIndex } from "./theme-picker.helpers"
 import type { ThemePickerProps } from "./theme-picker.types"
 
 const PICKER_WIDTH = 60
-// showDescription=true renders name + description on separate rows
 const ROWS_PER_ITEM = 2
 
 export function ThemePicker(props: ThemePickerProps) {
   const innerHeight = props.themes.length * ROWS_PER_ITEM
-  const boxHeight = innerHeight + 4 // 2 borders + 2 padding (top+bottom)
-  const left = Math.max(0, Math.floor((props.screenWidth - PICKER_WIDTH) / 2))
-  const top = Math.max(0, Math.floor((props.screenHeight - boxHeight) / 2))
+  const modalHeight = Math.floor(props.screenHeight * 0.6)
+  const selectHeight = Math.min(innerHeight, Math.max(1, modalHeight - 4))
   const selectedIndex = clampThemeIndex(props.selectedIndex, props.themes.length)
 
   return (
-    <box
+    <Modal
       id="theme-picker"
-      position="absolute"
-      top={top}
-      left={left}
+      title="THEMES"
+      bottomHint="j/k · Enter · Esc"
+      theme={props.theme}
+      screenWidth={props.screenWidth}
+      screenHeight={props.screenHeight}
       width={PICKER_WIDTH}
-      height={boxHeight}
-      borderStyle="double"
-      borderColor={props.theme.accent}
-      title="THEMES  j/k · Enter · Esc"
-      backgroundColor={props.theme.panelAlt}
-      padding={1}
+      heightFraction={0.6}
+      positioning={{ strategy: "centered" }}
     >
       <select
         width={PICKER_WIDTH - 4}
-        height={innerHeight}
+        height={selectHeight}
         options={props.themes.map((t) => ({
           name: t.id,
           description: t.description,
@@ -46,6 +43,6 @@ export function ThemePicker(props: ThemePickerProps) {
         itemSpacing={0}
         wrapSelection={false}
       />
-    </box>
+    </Modal>
   )
 }

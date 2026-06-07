@@ -1,3 +1,4 @@
+import type { KeyEvent } from "@opentui/core"
 import { useKeyboard, useTerminalDimensions } from "@opentui/react"
 import { useCallback, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -9,8 +10,40 @@ import { runSearchThunk } from "../../features/search/search.thunks"
 import { settingsActions } from "../../features/settings/settings.slice"
 import { uiActions } from "../../features/ui/ui.slice"
 import { RootLayout } from "../../layouts/root-layout/root-layout"
+import type { ThemeDefinition } from "../../registries/themes/theme.registry.types"
 import type { AppDispatch, RootState } from "../../state/store/store.types"
 import type { AppRootProps } from "./app-root.types"
+
+function handleThemePickerKey(
+  key: KeyEvent,
+  themes: ThemeDefinition[],
+  selectedIndex: number,
+  previousId: string,
+  dispatch: AppDispatch,
+): void {
+  if (key.name === "j" || key.name === "down") {
+    const nextIndex = Math.min(selectedIndex + 1, themes.length - 1)
+    dispatch(uiActions.moveThemePickerDown(themes.length))
+    const next = themes[nextIndex]
+    if (next) dispatch(settingsActions.setTheme(next.id))
+    return
+  }
+  if (key.name === "k" || key.name === "up") {
+    const nextIndex = Math.max(0, selectedIndex - 1)
+    dispatch(uiActions.moveThemePickerUp())
+    const next = themes[nextIndex]
+    if (next) dispatch(settingsActions.setTheme(next.id))
+    return
+  }
+  if (key.name === "escape") {
+    dispatch(settingsActions.setTheme(previousId))
+    dispatch(uiActions.closeThemePicker())
+    return
+  }
+  if (key.name === "return") {
+    dispatch(uiActions.closeThemePicker())
+  }
+}
 
 export function AppRoot(props: AppRootProps) {
   const dispatch = useDispatch<AppDispatch>()
@@ -111,30 +144,13 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (state.ui.themePickerOpen) {
-        const themes = props.themeRegistry.list()
-        if (key.name === "j" || key.name === "down") {
-          const nextIndex = Math.min(state.ui.themePickerSelectedIndex + 1, themes.length - 1)
-          dispatch(uiActions.moveThemePickerDown(themes.length))
-          const next = themes[nextIndex]
-          if (next) dispatch(settingsActions.setTheme(next.id))
-          return
-        }
-        if (key.name === "k" || key.name === "up") {
-          const nextIndex = Math.max(0, state.ui.themePickerSelectedIndex - 1)
-          dispatch(uiActions.moveThemePickerUp())
-          const next = themes[nextIndex]
-          if (next) dispatch(settingsActions.setTheme(next.id))
-          return
-        }
-        if (key.name === "escape") {
-          dispatch(settingsActions.setTheme(state.ui.themePickerPreviousId))
-          dispatch(uiActions.closeThemePicker())
-          return
-        }
-        if (key.name === "return") {
-          dispatch(uiActions.closeThemePicker())
-          return
-        }
+        handleThemePickerKey(
+          key,
+          props.themeRegistry.list(),
+          state.ui.themePickerSelectedIndex,
+          state.ui.themePickerPreviousId,
+          dispatch,
+        )
         return
       }
 

@@ -21,5 +21,7 @@ Validate UX rules:
 - now-playing track metadata (title/author) is set optimistically before audio initializes; a missing `nowPlaying` after a failed play is expected and not a regression
 - statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick; a static initial value while a track plays is a regression
 - theme picker opens as an absolute overlay on `:theme pick`; j/k/down/up navigate and apply live preview via `settingsActions.setTheme`; Escape restores `themePickerPreviousId` and closes; Enter confirms and closes; theme picker blocks all other key routes while open
+- HelpModal uses `Modal` base with `strategy: "centered"`, `widthFraction=0.68`, `minWidth=48`, `heightFraction=0.6`; ThemePicker uses `Modal` base with `strategy: "centered"`, `width=60`, `heightFraction=0.6`
+- all overlay components must use the shared `Modal` container (`src/components/modal/modal.tsx`); direct inline-chrome overlays (`position="absolute"` + `borderStyle="double"` applied outside Modal) are a regression
 
 Prioritize user-visible regressions in output.

@@ -43,7 +43,7 @@ export function RootLayout(props: RootLayoutProps) {
         width={props.width}
         theme={theme}
       />
-      {props.state.ui.helpOpen ? <HelpModal width={props.width} theme={theme} /> : null}
+      {props.state.ui.helpOpen ? <HelpModal screenWidth={props.width} screenHeight={props.height} theme={theme} /> : null}
       {props.state.ui.themePickerOpen ? (
         <ThemePicker
           themes={props.themeRegistry.list()}

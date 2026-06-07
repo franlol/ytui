@@ -28,6 +28,10 @@ metadata:
 - Verifies statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick and does not display a static initial value during active playback.
 - Verifies results-list renders an animated spinner (not an empty list) when `isLoading` is true.
 - Verifies optimistic now-playing: track metadata appears immediately on play initiation; `null` now-playing after a failed play is expected behavior, not a regression.
+- Verifies the currently playing track is marked with a right-aligned `◆` in results-list and queue-list; marker absent when `playback.nowPlaying` is null; `◆` clears after 3 consecutive unavailable sync ticks (~2.25 s).
+- Verifies theme picker Escape restores `themePickerPreviousId` and closes; Enter confirms without re-dispatching.
+- Verifies HelpModal and ThemePicker both use the shared `Modal` container (`src/components/modal/modal.tsx`); direct inline-chrome overlays are a regression.
+- Verifies HelpModal uses `strategy: "centered"` and ThemePicker uses `strategy: "centered"`, both with `heightFraction=0.6`.
 
 ## When to use
 
