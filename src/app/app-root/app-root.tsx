@@ -145,6 +145,10 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (key.name === "space") {
+        if (state.ui.mode === "search") {
+          dispatch(searchActions.setQuery(`${state.search.query} `))
+          return
+        }
         dispatch(runTogglePauseResumeThunk())
         return
       }

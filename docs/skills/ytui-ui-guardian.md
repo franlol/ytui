@@ -33,7 +33,7 @@ Protect MVP UX consistency.
 - on very small terminals, fixed panels remain visible first and results/queue may collapse when remaining height is below renderable minimum
 - SEARCH height budget accounts for border + padding so CAVA keeps a visible gap above statusline
 - UI state flow remains `react-redux` driven (no imperative render loop state syncing)
-- playback UX remains coherent: `Enter` in NORMAL plays selected queue track, `Ctrl+P` in SEARCH plays selected result, `Space` pauses/resumes current track
+- playback UX remains coherent: `Enter` in NORMAL plays selected queue track, `Ctrl+P` in SEARCH plays selected result, `Space` in NORMAL/ZEN pauses/resumes current track, `Space` in SEARCH appends a space character to the query
 - statusline keeps mode/command context on the left; transient feedback messages render in a side slot without replacing mode/command
 - visualizer remains session-scoped to ytui playback (no global system-audio coupling) and unsupported runtime paths fail soft without UI crash
 - visualizer glyph rendering remains registry-driven with safe fallback style behavior when style ids are unknown
