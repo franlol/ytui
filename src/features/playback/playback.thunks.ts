@@ -135,6 +135,8 @@ export const runSyncPlaybackProgressThunk = createAsyncThunk<void, void, { state
     const misses = state.playback.syncMisses + 1
     dispatch(playbackActions.setSyncMisses(misses))
     if (state.playback.playing && misses >= 3) {
+      dispatch(playbackActions.setNowPlaying(null))
+    } else if (state.playback.playing) {
       dispatch(playbackActions.tick())
     }
   },

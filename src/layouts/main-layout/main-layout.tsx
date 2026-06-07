@@ -41,6 +41,7 @@ export function MainLayout(props: MainLayoutProps) {
                   selectedIndex={props.state.search.selectedIndex}
                   widthCols={listWidth}
                   isLoading={props.state.search.isLoading}
+                  nowPlayingTrackId={props.state.playback.nowPlaying?.id}
                 />
               )
             : (

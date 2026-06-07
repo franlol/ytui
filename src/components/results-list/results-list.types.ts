@@ -9,4 +9,5 @@ export type ResultsListProps = {
   tracks: Track[]
   selectedIndex: number
   isLoading: boolean
+  nowPlayingTrackId?: string
 }

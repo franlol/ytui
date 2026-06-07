@@ -1,5 +1,11 @@
 import type { QueueListProps } from "./queue-list.types"
 
+function buildName(title: string, isPlaying: boolean, widthCols: number): string {
+  const maxWidth = widthCols - 3
+  if (!isPlaying) return title.slice(0, maxWidth)
+  return title.slice(0, maxWidth - 1).padEnd(maxWidth - 1) + "◆"
+}
+
 export function QueueList(props: QueueListProps) {
   const panelHeight = Math.max(3, props.heightRows)
   const selectedIndex = Math.max(0, Math.min(props.selectedIndex, Math.max(0, props.tracks.length - 1)))
@@ -34,7 +40,7 @@ export function QueueList(props: QueueListProps) {
         width={props.widthCols}
         height={Math.max(1, panelHeight - 2)}
         options={props.tracks.map((track) => ({
-          name: track.title,
+          name: buildName(track.title, track.id === props.nowPlayingTrackId, props.widthCols),
           description: `${track.author}  ${track.durationLabel}`,
           value: track.id,
         }))}

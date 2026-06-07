@@ -281,7 +281,36 @@ describe("playback thunks", () => {
     expect(store.getState().playback.volume).toBe(55)
   })
 
-  it("falls back to tick when runtime sync is unavailable repeatedly", async () => {
+  it("ticks elapsed during the 2-miss grace period when sync is unavailable", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 0, durationSec: null, paused: false, available: false, volume: null }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(playbackActions.setNowPlaying(track))
+    store.dispatch(playbackActions.setPlaying(true))
+    await store.dispatch(runSyncPlaybackProgressThunk())
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    const state = store.getState().playback
+    expect(state.elapsedSec).toBe(2)
+    expect(state.syncMisses).toBe(2)
+    expect(state.nowPlaying).not.toBeNull()
+  })
+
+  it("clears nowPlaying after 3 consecutive unavailable syncs", async () => {
     const services = makeServices({
       info: {
         id: "youtube",
@@ -306,7 +335,8 @@ describe("playback thunks", () => {
     await store.dispatch(runSyncPlaybackProgressThunk())
 
     const state = store.getState().playback
-    expect(state.elapsedSec).toBe(1)
-    expect(state.syncMisses).toBe(3)
+    expect(state.nowPlaying).toBeNull()
+    expect(state.playing).toBe(false)
+    expect(state.syncMisses).toBe(0)
   })
 })

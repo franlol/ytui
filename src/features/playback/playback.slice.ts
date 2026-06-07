@@ -17,11 +17,11 @@ export const playbackSlice = createSlice({
   reducers: {
     setNowPlaying(state, action: PayloadAction<Track | null>) {
       state.nowPlaying = action.payload
+      state.elapsedSec = 0
+      state.playing = false
+      state.syncMisses = 0
       if (action.payload) {
         state.durationSec = Math.max(1, action.payload.durationSec)
-        state.elapsedSec = 0
-        state.playing = false
-        state.syncMisses = 0
       }
     },
     setPlaying(state, action: PayloadAction<boolean>) {

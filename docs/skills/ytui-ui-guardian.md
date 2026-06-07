@@ -41,6 +41,8 @@ Protect MVP UX consistency.
 - `vol:` in the statusline reflects live mpv volume synced via the 750 ms telemetry tick; it must not display a static initial value while a track is playing
 - results-list renders an animated spinner when `isLoading` is true; an empty list during an active search is a regression
 - now-playing metadata (title/author) is set optimistically before audio initializes; a `null` now-playing after a failed play attempt is correct and expected
+- the currently playing track is marked with a right-aligned `◆` at the end of its title line in both results-list (SEARCH) and queue-list (NORMAL); the title is padded so `◆` lands at `widthCols - 1`; the marker must be absent when `playback.nowPlaying` is null
+- `playback.nowPlaying` is cleared (set to null) after 3 consecutive unavailable sync ticks (~2.25 s); during the 2-tick grace period elapsed time ticks normally; a stuck `◆` after track end is a regression
 
 ## Blocking Criteria
 
