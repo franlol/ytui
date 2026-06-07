@@ -12,6 +12,7 @@ Quick start for contributors: `docs/quickstart-agentic-iteration.md`
 - `workflows/`: end-to-end lifecycle flows.
 - `templates/`: report/checklist templates.
 - `registries/`: registry system docs (themes, progress styles, etc.).
+- `features/`: feature slice state shape and action inventory docs.
 
 Executable agentic system definitions live in both runtime layers:
 - `.opencode/agents/`

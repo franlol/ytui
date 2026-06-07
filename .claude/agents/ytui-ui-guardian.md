@@ -20,5 +20,6 @@ Validate UX rules:
 - results-list renders a spinner when `isLoading` is true; it must not render an empty list or frozen state during active search
 - now-playing track metadata (title/author) is set optimistically before audio initializes; a missing `nowPlaying` after a failed play is expected and not a regression
 - statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick; a static initial value while a track plays is a regression
+- theme picker opens as an absolute overlay on `:theme pick`; j/k/down/up navigate and apply live preview via `settingsActions.setTheme`; Escape restores `themePickerPreviousId` and closes; Enter confirms and closes; theme picker blocks all other key routes while open
 
 Prioritize user-visible regressions in output.

@@ -6,6 +6,9 @@ export type UiState = {
   commandActive: boolean
   commandBuffer: string
   helpOpen: boolean
+  themePickerOpen: boolean
+  themePickerSelectedIndex: number
+  themePickerPreviousId: string
   statusMessage: string | null
   statusLevel: StatusLevel | null
 }

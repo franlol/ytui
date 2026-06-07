@@ -86,6 +86,14 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
         return
       }
 
+      if (args[0] === "pick") {
+        const themes = context.themeRegistry.list()
+        const currentId = context.getState().settings.themeId
+        const currentIndex = Math.max(0, themes.findIndex((t) => t.id === currentId))
+        context.dispatch(uiActions.openThemePicker({ selectedIndex: currentIndex, previousId: currentId }))
+        return
+      }
+
       const themeId = args[0]
       if (context.themeRegistry.get(themeId)) {
         context.dispatch(settingsActions.setTheme(themeId))

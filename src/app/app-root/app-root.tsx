@@ -6,6 +6,7 @@ import { runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, 
 import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
+import { settingsActions } from "../../features/settings/settings.slice"
 import { uiActions } from "../../features/ui/ui.slice"
 import { RootLayout } from "../../layouts/root-layout/root-layout"
 import type { AppDispatch, RootState } from "../../state/store/store.types"
@@ -105,6 +106,34 @@ export function AppRoot(props: AppRootProps) {
       if (state.ui.helpOpen) {
         if (key.name === "escape" || key.name === "q" || key.name === "return") {
           dispatch(uiActions.setHelpOpen(false))
+        }
+        return
+      }
+
+      if (state.ui.themePickerOpen) {
+        const themes = props.themeRegistry.list()
+        if (key.name === "j" || key.name === "down") {
+          const nextIndex = Math.min(state.ui.themePickerSelectedIndex + 1, themes.length - 1)
+          dispatch(uiActions.moveThemePickerDown(themes.length))
+          const next = themes[nextIndex]
+          if (next) dispatch(settingsActions.setTheme(next.id))
+          return
+        }
+        if (key.name === "k" || key.name === "up") {
+          const nextIndex = Math.max(0, state.ui.themePickerSelectedIndex - 1)
+          dispatch(uiActions.moveThemePickerUp())
+          const next = themes[nextIndex]
+          if (next) dispatch(settingsActions.setTheme(next.id))
+          return
+        }
+        if (key.name === "escape") {
+          dispatch(settingsActions.setTheme(state.ui.themePickerPreviousId))
+          dispatch(uiActions.closeThemePicker())
+          return
+        }
+        if (key.name === "return") {
+          dispatch(uiActions.closeThemePicker())
+          return
         }
         return
       }

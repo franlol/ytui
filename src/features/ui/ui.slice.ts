@@ -8,6 +8,9 @@ const initialState: UiState = {
   commandActive: false,
   commandBuffer: "",
   helpOpen: false,
+  themePickerOpen: false,
+  themePickerSelectedIndex: 0,
+  themePickerPreviousId: "",
   statusMessage: null,
   statusLevel: null,
 }
@@ -35,6 +38,20 @@ export const uiSlice = createSlice({
     },
     setHelpOpen(state, action: PayloadAction<boolean>) {
       state.helpOpen = action.payload
+    },
+    openThemePicker(state, action: PayloadAction<{ selectedIndex: number; previousId: string }>) {
+      state.themePickerOpen = true
+      state.themePickerSelectedIndex = action.payload.selectedIndex
+      state.themePickerPreviousId = action.payload.previousId
+    },
+    closeThemePicker(state) {
+      state.themePickerOpen = false
+    },
+    moveThemePickerDown(state, action: PayloadAction<number>) {
+      state.themePickerSelectedIndex = Math.min(state.themePickerSelectedIndex + 1, action.payload - 1)
+    },
+    moveThemePickerUp(state) {
+      state.themePickerSelectedIndex = Math.max(0, state.themePickerSelectedIndex - 1)
     },
     setStatus(state, action: PayloadAction<{ message: string; level: StatusLevel }>) {
       state.statusMessage = action.payload.message

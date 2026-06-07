@@ -76,7 +76,7 @@ UI must consume state, not services directly.
   - `:q`
   - `:?`
   - `:sidebar on|off|toggle`
-  - `:theme list|<name>`
+  - `:theme list|<name>|pick`
   - `:progress list|<style>`
   - `:provider list|current|use <id>`
   - `:plugin list|info <id>|reload`
@@ -146,6 +146,8 @@ MVP views:
 - `ZEN`
 
 Help is modal (`:?`) and global.
+Theme picker is modal (`:theme pick`) — an absolute overlay with live preview. j/k navigate and apply the theme immediately; Enter confirms; Escape restores the previously active theme and closes.
+Overlay keyboard preemption order: `helpOpen` → `themePickerOpen` → `commandActive` → normal mode. Each overlay must block all lower-priority key routes while it is open. Overlays must not stack — only one may be open at a time.
 Sidebar is controlled by command only (no dedicated keybind requirement).
 ZEN content area should stay minimal.
 

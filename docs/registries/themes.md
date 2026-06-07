@@ -16,6 +16,7 @@ The theme registry provides a token-based, registry-driven color system for ytui
 ```
 :theme list          — list all registered theme IDs
 :theme <id>          — switch active theme (e.g. :theme palenight)
+:theme pick          — open the interactive theme picker (j/k to preview live, Enter to confirm, Esc to cancel)
 ```
 
 ## Config Persistence

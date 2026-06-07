@@ -43,6 +43,7 @@ Protect MVP UX consistency.
 - now-playing metadata (title/author) is set optimistically before audio initializes; a `null` now-playing after a failed play attempt is correct and expected
 - the currently playing track is marked with a right-aligned `◆` at the end of its title line in both results-list (SEARCH) and queue-list (NORMAL); the title is padded so `◆` lands at `widthCols - 1`; the marker must be absent when `playback.nowPlaying` is null
 - `playback.nowPlaying` is cleared (set to null) after 3 consecutive unavailable sync ticks (~2.25 s); during the 2-tick grace period elapsed time ticks normally; a stuck `◆` after track end is a regression
+- theme picker opens as an absolute overlay on `:theme pick`; j/k/down/up navigate and apply live preview via `settingsActions.setTheme`; Escape restores `themePickerPreviousId` and closes; Enter confirms and closes; theme picker blocks all other key routes while open
 
 ## Blocking Criteria
 

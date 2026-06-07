@@ -1,4 +1,5 @@
 import { HelpModal } from "../../components/help-modal/help-modal"
+import { ThemePicker } from "../../components/theme-picker/theme-picker"
 import { Statusline } from "../../components/statusline/statusline"
 import { Topbar } from "../../components/topbar/topbar"
 import { MainLayout } from "../main-layout/main-layout"
@@ -43,6 +44,15 @@ export function RootLayout(props: RootLayoutProps) {
         theme={theme}
       />
       {props.state.ui.helpOpen ? <HelpModal width={props.width} theme={theme} /> : null}
+      {props.state.ui.themePickerOpen ? (
+        <ThemePicker
+          themes={props.themeRegistry.list()}
+          selectedIndex={props.state.ui.themePickerSelectedIndex}
+          theme={theme}
+          screenWidth={props.width}
+          screenHeight={props.height}
+        />
+      ) : null}
     </box>
   )
 }
