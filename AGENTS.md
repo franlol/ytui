@@ -98,6 +98,7 @@ MVP themes:
 - `gruvbox`
 - `nord`
 - `matrix`
+- `palenight`
 
 No hardcoded UI colors in component logic beyond fallback safety.
 

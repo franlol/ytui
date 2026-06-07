@@ -118,5 +118,25 @@ export function createDefaultThemeRegistry(): ThemeRegistry {
     },
   })
 
+  registry.register({
+    id: "palenight",
+    description: "Soft blue-purple Material Night palette",
+    tokens: {
+      bg: "#292d3e",
+      panel: "#1b1e2b",
+      panelAlt: "#3c435e",
+      text: "#a6accd",
+      muted: "#676e95",
+      accent: "#c792ea",
+      border: "#ffcb6b",
+      status: "#1b1e2b",
+      statusText: "#a6accd",
+      selectedBg: "#444267",
+      statusInfoText: "#a6accd",
+      statusOkText: "#c3e88d",
+      statusErrText: "#f07178",
+    },
+  })
+
   return registry
 }
