@@ -1,3 +1,4 @@
+import { clampThemeIndex } from "./theme-picker.helpers"
 import type { ThemePickerProps } from "./theme-picker.types"
 
 const PICKER_WIDTH = 60
@@ -9,7 +10,7 @@ export function ThemePicker(props: ThemePickerProps) {
   const boxHeight = innerHeight + 4 // 2 borders + 2 padding (top+bottom)
   const left = Math.max(0, Math.floor((props.screenWidth - PICKER_WIDTH) / 2))
   const top = Math.max(0, Math.floor((props.screenHeight - boxHeight) / 2))
-  const selectedIndex = Math.max(0, Math.min(props.selectedIndex, Math.max(0, props.themes.length - 1)))
+  const selectedIndex = clampThemeIndex(props.selectedIndex, props.themes.length)
 
   return (
     <box
