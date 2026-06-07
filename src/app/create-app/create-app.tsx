@@ -3,11 +3,8 @@ import { createRoot } from "@opentui/react"
 import { Provider } from "react-redux"
 import { AppRoot } from "../app-root/app-root"
 import { setupDefaultCommands } from "../../features/commands/setup-default-commands/setup-default-commands"
-import { playbackActions } from "../../features/playback/playback.slice"
 import { pluginsActions } from "../../features/plugins/plugins.slice"
 import { providerActions } from "../../features/provider/provider.slice"
-import { queueActions } from "../../features/queue/queue.slice"
-import { searchActions } from "../../features/search/search.slice"
 import { settingsActions } from "../../features/settings/settings.slice"
 import { uiActions } from "../../features/ui/ui.slice"
 import { CommandRegistry } from "../../registries/commands/command.registry"
@@ -70,11 +67,6 @@ export async function createApp(): Promise<AppRuntime> {
 
   setupDefaultCommands(commandRegistry)
 
-  const bootProvider = providerManager.getActive()
-  const initialTracks = await bootProvider?.search?.search("", config.resultsLimit)
-  store.dispatch(searchActions.searchSuccess(initialTracks ?? []))
-  store.dispatch(queueActions.setQueue((initialTracks ?? []).slice(0, 3)))
-  store.dispatch(playbackActions.setNowPlaying((initialTracks ?? [])[0] ?? null))
 
   const renderer = await createCliRenderer({
     exitOnCtrlC: true,

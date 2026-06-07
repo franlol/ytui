@@ -3,7 +3,7 @@ import type { Track } from "../../types/app.types"
 import type { SearchState } from "./search.types"
 
 const initialState: SearchState = {
-  query: "nujabes feather",
+  query: "",
   results: [],
   selectedIndex: 0,
   isLoading: false,
