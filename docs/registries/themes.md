@@ -10,6 +10,11 @@ The theme registry provides a token-based, registry-driven color system for ytui
 | `nord` | Cool nordic palette |
 | `matrix` | Green phosphor terminal |
 | `palenight` | Soft blue-purple Material Night palette |
+| `dracula` | Dark purple Dracula palette |
+| `catppuccin` | Soothing pastel dark (Mocha) |
+| `one-dark` | Atom One Dark |
+| `tokyo-night` | Deep blue-indigo Tokyo Night |
+| `solarized-dark` | Ethan Schoonover Solarized dark |
 
 ## Runtime Commands
 

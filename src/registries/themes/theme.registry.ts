@@ -138,5 +138,105 @@ export function createDefaultThemeRegistry(): ThemeRegistry {
     },
   })
 
+  registry.register({
+    id: "dracula",
+    description: "Dark purple Dracula palette",
+    tokens: {
+      bg: "#282a36",
+      panel: "#21222c",
+      panelAlt: "#44475a",
+      text: "#f8f8f2",
+      muted: "#6272a4",
+      accent: "#bd93f9",
+      border: "#44475a",
+      status: "#21222c",
+      statusText: "#f8f8f2",
+      selectedBg: "#44475a",
+      statusInfoText: "#f8f8f2",
+      statusOkText: "#50fa7b",
+      statusErrText: "#ff5555",
+    },
+  })
+
+  registry.register({
+    id: "catppuccin",
+    description: "Soothing pastel dark (Mocha)",
+    tokens: {
+      bg: "#1e1e2e",
+      panel: "#181825",
+      panelAlt: "#313244",
+      text: "#cdd6f4",
+      muted: "#6c7086",
+      accent: "#cba6f7",
+      border: "#45475a",
+      status: "#181825",
+      statusText: "#cdd6f4",
+      selectedBg: "#313244",
+      statusInfoText: "#cdd6f4",
+      statusOkText: "#a6e3a1",
+      statusErrText: "#f38ba8",
+    },
+  })
+
+  registry.register({
+    id: "one-dark",
+    description: "Atom One Dark",
+    tokens: {
+      bg: "#282c34",
+      panel: "#21252b",
+      panelAlt: "#2c313a",
+      text: "#abb2bf",
+      muted: "#5c6370",
+      accent: "#61afef",
+      border: "#3e4452",
+      status: "#21252b",
+      statusText: "#abb2bf",
+      selectedBg: "#2c313a",
+      statusInfoText: "#abb2bf",
+      statusOkText: "#98c379",
+      statusErrText: "#e06c75",
+    },
+  })
+
+  registry.register({
+    id: "tokyo-night",
+    description: "Deep blue-indigo Tokyo Night",
+    tokens: {
+      bg: "#1a1b26",
+      panel: "#16161e",
+      panelAlt: "#1f2335",
+      text: "#c0caf5",
+      muted: "#565f89",
+      accent: "#7aa2f7",
+      border: "#292e42",
+      status: "#16161e",
+      statusText: "#c0caf5",
+      selectedBg: "#1f2335",
+      statusInfoText: "#c0caf5",
+      statusOkText: "#9ece6a",
+      statusErrText: "#f7768e",
+    },
+  })
+
+  registry.register({
+    id: "solarized-dark",
+    description: "Ethan Schoonover Solarized dark",
+    tokens: {
+      bg: "#002b36",
+      panel: "#073642",
+      panelAlt: "#0d4a58",
+      text: "#839496",
+      muted: "#586e75",
+      accent: "#268bd2",
+      border: "#094555",
+      status: "#073642",
+      statusText: "#93a1a1",
+      selectedBg: "#0d4a58",
+      statusInfoText: "#93a1a1",
+      statusOkText: "#859900",
+      statusErrText: "#dc322f",
+    },
+  })
+
   return registry
 }

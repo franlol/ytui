@@ -20,6 +20,11 @@ describe("ThemeRegistry — register / get / list", () => {
     expect(ids).toContain("nord")
     expect(ids).toContain("matrix")
     expect(ids).toContain("palenight")
+    expect(ids).toContain("dracula")
+    expect(ids).toContain("catppuccin")
+    expect(ids).toContain("one-dark")
+    expect(ids).toContain("tokyo-night")
+    expect(ids).toContain("solarized-dark")
   })
 })
 
