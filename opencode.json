@@ -17,7 +17,8 @@
           "ytui-provider-guardian": "allow",
           "ytui-ui-guardian": "allow",
           "ytui-docs-sync-guardian": "allow",
-          "ytui-release-auditor": "allow"
+          "ytui-release-auditor": "allow",
+          "ytui-agentic-system-guardian": "allow"
         }
       }
     },

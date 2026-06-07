@@ -8,4 +8,6 @@
 - `/ytui-review-docs-sync`
 - `/ytui-release-audit`
 
+- `/ytui-maintain-agentic-system`
+
 Each command has a dedicated spec in this directory.

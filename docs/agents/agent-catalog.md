@@ -19,4 +19,7 @@
 - `ytui-docs-sync-guardian`
   - Enforces mandatory docs updates for important changes.
 
+- `ytui-agentic-system-guardian`
+  - Validates dual-world agentic system consistency between .opencode/ and .claude/.
+
 See detailed behavior in `../skills/`.
