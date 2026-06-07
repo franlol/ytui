@@ -49,7 +49,59 @@ Every theme must supply all `ThemeBaseTokens`. Semantic status tokens (`statusIn
 | `statusOkText` | Ok/success status messages |
 | `statusErrText` | Error status messages |
 
-## Adding a New Theme
+## User-Defined Themes
+
+Users can add custom themes without editing source code by placing JSON files in:
+
+```
+~/.config/ytui/themes/<name>.json
+```
+
+ytui scans this directory at startup and registers every valid `.json` file into the theme registry. Invalid files are silently skipped — they never crash the app.
+
+### File format
+
+```json
+{
+  "id": "catppuccin",
+  "description": "Soothing pastel theme",
+  "tokens": {
+    "bg": "#1e1e2e",
+    "panel": "#181825",
+    "panelAlt": "#313244",
+    "text": "#cdd6f4",
+    "muted": "#7f849c",
+    "accent": "#cba6f7",
+    "border": "#45475a",
+    "status": "#181825",
+    "statusText": "#cdd6f4",
+    "selectedBg": "#313244",
+    "statusInfoText": "#cdd6f4",
+    "statusOkText": "#a6e3a1",
+    "statusErrText": "#f38ba8"
+  }
+}
+```
+
+- `id`, `description`, and all ten `ThemeBaseTokens` fields are **required**.
+- Semantic status tokens (`statusInfoText`, `statusOkText`, `statusErrText`) are optional; omitting them falls back to the registry defaults.
+- An `id` that matches a built-in theme is rejected — built-ins always win.
+- A restart is required to pick up new or changed files.
+
+### Constraints
+
+| Constraint | Behaviour |
+|---|---|
+| Missing required field | File silently skipped |
+| Invalid JSON | File silently skipped |
+| `id` collides with built-in | File silently skipped |
+| Directory does not exist | Silently ignored (no user themes loaded) |
+
+### Implementation
+
+The loader lives in `src/services/themes/theme-loader/theme-loader.ts`. It is called in `src/app/create-app/create-app.tsx` after `createDefaultThemeRegistry()`, so user themes are registered before the app renders.
+
+## Adding a New Built-in Theme
 
 1. Open `src/registries/themes/theme.registry.ts`.
 2. Inside `createDefaultThemeRegistry()`, call `registry.register()` with a `ThemeDefinition`:

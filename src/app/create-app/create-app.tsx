@@ -15,6 +15,7 @@ import { FileConfigService } from "../../services/config/config.service"
 import { DefaultProviderManager } from "../../services/providers/provider-manager/provider-manager"
 import { YoutubeProvider } from "../../services/providers/youtube/youtube.provider"
 import { loadPluginManifests } from "../../services/plugins/plugin-loader/plugin-loader"
+import { loadUserThemes } from "../../services/themes/theme-loader/theme-loader"
 import { YtDlpSearchService } from "../../services/search/search.service"
 import { CavaVisualizerService } from "../../services/visualizer/cava-visualizer.service"
 import { createAppStore } from "../../state/store/store"
@@ -64,6 +65,13 @@ export async function createApp(): Promise<AppRuntime> {
       })),
     ),
   )
+
+  const userThemes = await loadUserThemes(new Set(themeRegistry.list().map((t) => t.id)))
+  for (const result of userThemes) {
+    if (result.definition) {
+      themeRegistry.register(result.definition)
+    }
+  }
 
   setupDefaultCommands(commandRegistry)
 
