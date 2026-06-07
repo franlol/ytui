@@ -13,7 +13,7 @@ Ensure important code changes are documented in the same contribution.
 ## Steps
 
 1. Classify changed code by importance.
-2. Map important code to required docs and `.opencode` definitions.
+2. Map important code to required docs and agentic system definitions (`.opencode/`, `.claude/`).
 3. Validate updates are present and coherent.
 4. Report missing mappings and required fixes.
 
@@ -37,5 +37,5 @@ Ensure important code changes are documented in the same contribution.
 
 ## Examples
 
-- Architecture change in `src/state/` requires `docs/store` and `.opencode` updates.
-- Command behavior change requires updates in `docs/commands/` and `.opencode/commands/`.
+- Architecture change in `src/state/` requires `docs/store` and agentic system updates.
+- Command behavior change requires updates in `docs/commands/`, `.opencode/commands/`, and `.claude/commands/`.

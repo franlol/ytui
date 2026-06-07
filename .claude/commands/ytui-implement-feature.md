@@ -1,6 +1,5 @@
 ---
 description: YTUI implement an approved feature plan
-agent: build
 ---
 Implement the approved feature according to repository architecture rules.
 

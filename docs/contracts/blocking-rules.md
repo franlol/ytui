@@ -10,7 +10,7 @@ A change is blocked if any of the following is true:
 - Command system bypasses registry model.
 - Config behavior violates `~/.config/ytui/ytui.conf` contract.
 - Required tests for touched areas are missing or failing.
-- Important code changes are made without matching updates under `docs/` and/or `.opencode/`.
+- Important code changes are made without matching updates under `docs/` and/or the agentic system (`.opencode/`, `.claude/`).
 - `/ytui-review-docs-sync` is not executed for important changes.
 
 Override path: see `../policies/break-glass-policy.md`.

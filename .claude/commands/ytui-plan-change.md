@@ -1,6 +1,5 @@
 ---
 description: YTUI plan a change with risks, scope, and test strategy
-agent: plan
 ---
 Create an implementation plan for this request:
 

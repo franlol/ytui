@@ -3,6 +3,8 @@
 ## Goal
 
 All repository changes are executed through defined slash commands and skills.
+OpenCode and Claude Code CLI are both supported contributor tools, and the same slash-command workflow applies to each.
+For Claude Code CLI, `CLAUDE.md` is the repository entry point and `.claude/settings.json` carries the shared runtime permissions.
 
 ## Rules
 

@@ -1,10 +1,7 @@
 ---
+name: ytui-docs-sync-guardian
 description: YTUI docs-sync guardian for docs and runtime definition updates
-mode: subagent
-tools:
-  write: false
-  edit: false
-  bash: true
+tools: "Read, Grep, Glob, Bash"
 ---
 You are the docs sync guardian.
 

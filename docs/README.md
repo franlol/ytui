@@ -12,10 +12,19 @@ Quick start for contributors: `docs/quickstart-agentic-iteration.md`
 - `workflows/`: end-to-end lifecycle flows.
 - `templates/`: report/checklist templates.
 
-Executable OpenCode runtime definitions live in `.opencode/`:
+Executable agentic system definitions live in both runtime layers:
 - `.opencode/agents/`
 - `.opencode/commands/`
 - `.opencode/skills/<name>/SKILL.md`
+- `.claude/agents/`
+- `.claude/commands/`
+- `.claude/skills/<name>/SKILL.md`
+
+Claude Code CLI is a supported contributor tool alongside OpenCode.
+The `.claude/` directory is the Claude Code CLI adapter layer.
+- `CLAUDE.md` is the Claude Code CLI entry point and delegates to `AGENTS.md`.
+- `.claude/settings.json` is the shared Claude Code CLI permissions file for this repository.
+- `.claude/settings.local.json`, when present, is for local Claude Code CLI overrides.
 
 UI runtime note:
 - Core app rendering uses `@opentui/react` with `react-redux` for store binding.

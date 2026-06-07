@@ -32,7 +32,7 @@ If plugin work is involved, also run:
 
 - `AGENT_REPORT.md` completed
 - PR checklist completed (`docs/templates/pr-checklist.template.md`)
-- Any important code change has matching updates in `docs/` and/or `.opencode/`
+- Any important code change has matching updates in `docs/` and/or the agentic system (`.opencode/`, `.claude/`)
 
 ## Which Commands Should I Run?
 

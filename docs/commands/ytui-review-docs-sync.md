@@ -15,7 +15,7 @@ Verify that important code changes include corresponding docs and runtime defini
 
 ## Required Checks
 
-- important code areas changed => relevant updates under `docs/` and/or `.opencode/` changed
+- important code areas changed => relevant updates under `docs/` and/or the agentic system (`.opencode/`, `.claude/`) changed
 - `AGENT_REPORT.md` includes docs mapping section
 - no missing policy/contract/workflow updates when rules changed
 

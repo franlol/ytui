@@ -1,0 +1,32 @@
+---
+name: ytui-ui-guardian
+description: Validate core UX invariants across NORMAL, SEARCH, ZEN, and help modal
+metadata:
+  scope: ui
+  priority: medium
+---
+## What this skill does
+
+- Verifies required views and transitions.
+- Ensures command mode and help modal behavior remain coherent.
+- Flags user-visible regressions.
+- Verifies statusline severity text is normalized to `OK:`, `ERR:`, `INFO:` without duplicate prefixes.
+- Verifies statusline severity colors resolve automatically with safe fallbacks when themes omit explicit severity tokens.
+- Verifies list panels remain viewport-safe and do not overflow container bounds.
+- Verifies fixed-height panel constraints for SEARCH, NOW PLAYING, and CAVA with results/queue filling remaining space.
+- Verifies NOW PLAYING title, author, and time+progress lines remain width-safe and non-overlapping.
+- Verifies NOW PLAYING click-to-seek is limited to the rendered progress bar region and ignores timestamp/prefix clicks.
+- Verifies NOW PLAYING elapsed/duration follows runtime playback telemetry and does not freeze at stale metadata duration.
+- Verifies fixed panels take precedence in very small viewports and list panels may collapse if remaining space is insufficient.
+- Verifies SEARCH panel height budgeting includes its chrome so CAVA does not touch the statusline.
+- Verifies UI behavior is driven through `@opentui/react` + `react-redux` state flow, not imperative render-loop syncing.
+- Verifies playback controls are discoverable and coherent (`Enter` NORMAL play, `Ctrl+P` SEARCH play, `Space` pause/resume).
+- Verifies statusline preserves left mode/command context while feedback messages render in a side slot.
+- Verifies visualizer behavior stays scoped to active ytui playback session and unsupported runtime paths degrade gracefully.
+- Verifies visualizer glyph style behavior remains registry-driven with deterministic fallback for unknown style ids.
+- Verifies visualizer source-mode UX is explicit (`ytui-strict`, `ytui-best-effort`, `system`) with correct warning/disable behavior.
+
+## When to use
+
+- UI layout or interaction changes
+- Command UX updates

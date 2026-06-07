@@ -2,7 +2,7 @@
 
 Skills are reusable agent procedures.
 
-Executable skill definitions are stored in `.opencode/skills/<name>/SKILL.md`.
+Executable skill definitions are stored in `.opencode/skills/<name>/SKILL.md` and `.claude/skills/<name>/SKILL.md`.
 This folder documents skill expectations and governance constraints.
 
 Each skill follows `../contracts/skill-interface.md`.

@@ -1,8 +1,8 @@
 ---
 description: YTUI verify important changes updated docs and runtime definitions
-agent: ytui-docs-sync-guardian
-subtask: true
 ---
+Use the Task tool to delegate to the `ytui-docs-sync-guardian` subagent with the following prompt:
+
 Audit docs synchronization for current changes.
 
 Check both:

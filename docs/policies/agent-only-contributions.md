@@ -3,13 +3,14 @@
 ## Policy
 
 All repository contributions must be executed through documented slash commands and skills.
+OpenCode and Claude Code CLI are valid contributor tools for this workflow.
 
 ## Requirements
 
 - Contributor must run `/ytui-plan-change` before implementation.
 - Contributor must attach `AGENT_REPORT.md` in each PR.
 - Contributor must run all required review commands for touched scope.
-- Contributor must update corresponding specs for every important change (`docs/` and `.opencode/` when behavior/runtime definitions change).
+- Contributor must update corresponding specs for every important change in `docs/` and, when behavior/runtime definitions change, in the agentic system (`.opencode/`, `.claude/`).
 - Contributor must run `/ytui-review-docs-sync` before merge.
 
 ## Important Change Definition

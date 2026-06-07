@@ -2,7 +2,7 @@
 
 This folder defines how agents are used in this repository.
 
-Executable agent definitions are stored in `.opencode/agents/*.md`.
+Executable agent definitions are stored in `.opencode/agents/*.md` and `.claude/agents/*.md`.
 This folder documents agent policy and execution behavior.
 
 Read in order:
