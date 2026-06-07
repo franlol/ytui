@@ -26,6 +26,8 @@ metadata:
 - Verifies visualizer glyph style behavior remains registry-driven with deterministic fallback for unknown style ids.
 - Verifies visualizer source-mode UX is explicit (`ytui-strict`, `ytui-best-effort`, `system`) with correct warning/disable behavior.
 - Verifies statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick and does not display a static initial value during active playback.
+- Verifies results-list renders an animated spinner (not an empty list) when `isLoading` is true.
+- Verifies optimistic now-playing: track metadata appears immediately on play initiation; `null` now-playing after a failed play is expected behavior, not a regression.
 
 ## When to use
 

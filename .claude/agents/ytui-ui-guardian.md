@@ -17,6 +17,8 @@ Validate UX rules:
 - now-playing click-to-seek is constrained to progress-bar hit zone and ignores timestamp clicks
 - visualizer source-mode behavior is explicit (`ytui-strict`, `ytui-best-effort`, `system`) and status feedback matches mode behavior
 - now-playing elapsed/duration tracks runtime playback state and does not stick at stale metadata caps
+- results-list renders a spinner when `isLoading` is true; it must not render an empty list or frozen state during active search
+- now-playing track metadata (title/author) is set optimistically before audio initializes; a missing `nowPlaying` after a failed play is expected and not a regression
 - statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick; a static initial value while a track plays is a regression
 
 Prioritize user-visible regressions in output.

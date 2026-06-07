@@ -29,6 +29,8 @@ Enforce provider-capability architecture.
 - playback progress telemetry is read via provider playback capability contracts (no direct UI service/process reads)
 - provider playback implementations use typed playback services (for example `MpvPlaybackService`) so additional providers can reuse engine adapters
 - visualizer source routing modes preserve provider-scoped behavior by default (`ytui-strict`) and only enter global-audio behavior when explicitly set to `system`
+- youtube provider owns a `StreamUrlCache` instance; stream URL resolution must not bypass this cache (TTL 4h, max 3 concurrent `yt-dlp` fetches, evict-on-failure)
+- `prefetch` is called with result track IDs after every search batch so URLs are warm before playback is initiated
 
 ## Blocking Criteria
 
