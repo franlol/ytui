@@ -40,6 +40,7 @@ export function MainLayout(props: MainLayoutProps) {
                   tracks={props.state.search.results}
                   selectedIndex={props.state.search.selectedIndex}
                   widthCols={listWidth}
+                  isLoading={props.state.search.isLoading}
                 />
               )
             : (

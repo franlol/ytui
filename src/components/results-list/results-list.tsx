@@ -1,8 +1,36 @@
+import { useEffect, useState } from "react"
+import type { ThemeTokens } from "../../registries/themes/theme.registry.types"
 import type { ResultsListProps } from "./results-list.types"
+
+function Spinner({ theme }: { theme: ThemeTokens }) {
+  const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+  const [frame, setFrame] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setFrame((f) => (f + 1) % frames.length), 80)
+    return () => clearInterval(id)
+  }, [])
+  return <text content={`  ${frames[frame]}  searching...`} fg={theme.muted} />
+}
 
 export function ResultsList(props: ResultsListProps) {
   const panelHeight = Math.max(3, props.heightRows)
   const selectedIndex = Math.max(0, Math.min(props.selectedIndex, Math.max(0, props.tracks.length - 1)))
+
+  if (props.isLoading) {
+    return (
+      <box
+        height={panelHeight}
+        borderStyle="single"
+        borderColor={props.theme.border}
+        title="RESULTS"
+        backgroundColor={props.theme.panel}
+        paddingLeft={1}
+        paddingRight={1}
+      >
+        <Spinner theme={props.theme} />
+      </box>
+    )
+  }
 
   if (props.totalCount === 0) {
     return (

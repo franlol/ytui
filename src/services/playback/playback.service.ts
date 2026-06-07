@@ -25,11 +25,10 @@ export class MpvPlaybackService implements PlaybackService {
   constructor(private readonly binaryPath = "mpv") {}
 
   async play(source: PlaybackSource): Promise<PlaybackSession> {
-    await this.stop()
-
     const sessionId = randomUUID()
     const mode = source.cavaSourceMode ?? "ytui-strict"
-    this.currentRoute = await createAudioRoute(sessionId, mode)
+    const [, route] = await Promise.all([this.stop(), createAudioRoute(sessionId, mode)])
+    this.currentRoute = route
 
     const ipcPath = join(tmpdir(), `ytui-mpv-${process.pid}-${randomUUID()}.sock`)
     const args = [

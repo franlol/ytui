@@ -3,6 +3,7 @@ import { PlaybackServiceError, MpvPlaybackService } from "../../playback/playbac
 import type { PlaybackService } from "../../playback/playback.service.types"
 import { YtDlpSearchService } from "../../search/search.service"
 import type { SearchService } from "../../search/search.service.types"
+import { StreamUrlCache } from "../../stream-url-cache/stream-url-cache"
 import type { MusicProvider, PlaybackRequestOptions } from "../provider.types"
 import type { YoutubeProviderCatalog } from "./youtube.provider.types"
 
@@ -81,11 +82,13 @@ export class YoutubeProvider implements MusicProvider {
   private catalog: Track[]
   private searchService: SearchService
   private playbackService: PlaybackService
+  private streamUrlCache: StreamUrlCache
 
   constructor(options?: YoutubeProviderCatalog) {
     this.catalog = options?.tracks ?? defaultCatalog
     this.searchService = options?.searchService ?? new YtDlpSearchService()
     this.playbackService = options?.playbackService ?? new MpvPlaybackService()
+    this.streamUrlCache = options?.streamUrlCache ?? new StreamUrlCache()
   }
 
   search = {
@@ -103,14 +106,17 @@ export class YoutubeProvider implements MusicProvider {
           return []
         }
 
-        return results.map((result) => ({
+        const tracks = results.map((result) => ({
           id: result.id,
           title: result.title,
           author: result.author,
           durationSec: result.durationSec,
           durationLabel: result.durationLabel,
-          source: "youtube",
+          source: "youtube" as const,
         }))
+
+        this.streamUrlCache.prefetch(tracks.map((t) => t.id))
+        return tracks
       } catch {
         const fallback = this.catalog.filter((track) => `${track.title} ${track.author}`.toLowerCase().includes(normalized.toLowerCase()))
         return fallback.slice(0, safeLimit)
@@ -120,7 +126,13 @@ export class YoutubeProvider implements MusicProvider {
 
   playback = {
     play: async (track: Track, options?: PlaybackRequestOptions) => {
-      const sourceUrl = resolveYoutubeTrackUrl(track)
+      let sourceUrl: string
+      try {
+        sourceUrl = this.streamUrlCache.get(track.id) ?? await this.streamUrlCache.resolve(track.id)
+      } catch {
+        this.streamUrlCache.evict(track.id)
+        sourceUrl = resolveYoutubeTrackUrl(track)
+      }
       await this.playbackService.play({ url: sourceUrl, cavaSourceMode: options?.cavaSourceMode })
     },
     pause: async () => {

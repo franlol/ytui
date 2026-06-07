@@ -16,10 +16,11 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
       return
     }
 
+    dispatch(playbackActions.setNowPlaying(track))
+
     try {
       await dispatch(runStopVisualizerThunk())
       await provider.playback.play(track, { cavaSourceMode: state.settings.cavaSourceMode })
-      dispatch(playbackActions.setNowPlaying(track))
       dispatch(playbackActions.setPlaying(true))
 
       const session = provider.playback.getPlaybackSession?.()
@@ -29,6 +30,7 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
 
       dispatch(uiActions.setStatus({ message: `OK: playing ${track.title}`, level: "ok" }))
     } catch (error) {
+      dispatch(playbackActions.setNowPlaying(null))
       const message = error instanceof Error ? error.message : "Playback failed"
       dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
     }

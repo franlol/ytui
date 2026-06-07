@@ -162,12 +162,18 @@ export function AppRoot(props: AppRootProps) {
 
       if (state.ui.mode === "search") {
         if (key.name === "return") {
-          dispatch(runSearchThunk())
+          if (!state.search.isLoading) {
+            dispatch(runSearchThunk())
+          }
           return
         }
 
         if (key.ctrl && key.name === "p") {
           playTrackFromState()
+          return
+        }
+
+        if (state.search.isLoading) {
           return
         }
 

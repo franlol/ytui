@@ -8,4 +8,5 @@ export type ResultsListProps = {
   widthCols: number
   tracks: Track[]
   selectedIndex: number
+  isLoading: boolean
 }
