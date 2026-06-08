@@ -21,19 +21,50 @@ export class MpvPlaybackService implements PlaybackService {
   private ipcPath: string | null = null
   private currentSession: PlaybackSession | null = null
   private currentRoute: AudioRoute | null = null
+  private currentRouteMode: CavaSourceMode | null = null
+  // Incremented at the start of every play() call. Each concurrent call
+  // captures its value; checks after each await abort older calls so only
+  // the latest request ever spawns an mpv process.
+  private playGeneration = 0
 
   constructor(private readonly binaryPath = "mpv") {}
 
   async play(source: PlaybackSource): Promise<PlaybackSession> {
+    const myGen = ++this.playGeneration
     const sessionId = randomUUID()
     const mode = source.cavaSourceMode ?? "ytui-strict"
-    const [, route] = await Promise.all([this.stop(), createAudioRoute(sessionId, mode)])
-    this.currentRoute = route
+
+    // Reuse the PulseAudio route when the cava mode hasn't changed — this
+    // avoids tearing down and rebuilding the null-sink + loopback between
+    // tracks, which is what causes the audio artifact heard at track start.
+    const reuseRoute = this.currentRoute !== null && this.currentRouteMode === mode
+
+    if (reuseRoute) {
+      await this.stopProcessOnly()
+
+      if (myGen !== this.playGeneration) {
+        throw new PlaybackServiceError("superseded")
+      }
+    } else {
+      // Mode changed or first play: full stop + fresh route.
+      // Run concurrently; if superseded, clean up the route we created.
+      const [, route] = await Promise.all([this.stop(), createAudioRoute(sessionId, mode)])
+
+      if (myGen !== this.playGeneration) {
+        if (route?.loopbackModuleId) void unloadModule(route.loopbackModuleId).catch(() => {})
+        if (route?.sinkModuleId) void unloadModule(route.sinkModuleId).catch(() => {})
+        throw new PlaybackServiceError("superseded")
+      }
+
+      this.currentRoute = route
+      this.currentRouteMode = mode
+    }
 
     const ipcPath = join(tmpdir(), `ytui-mpv-${process.pid}-${randomUUID()}.sock`)
     const args = [
       "--no-video",
       "--really-quiet",
+      "--no-terminal",
       `--input-ipc-server=${ipcPath}`,
       ...(this.currentRoute?.sinkName ? [`--audio-device=pulse/${this.currentRoute.sinkName}`] : []),
       source.url,
@@ -69,6 +100,11 @@ export class MpvPlaybackService implements PlaybackService {
       waitForFile(ipcPath, DEFAULT_TIMEOUT_MS)
         .then(() => {
           cleanup()
+          if (myGen !== this.playGeneration) {
+            child.kill("SIGTERM")
+            reject(new PlaybackServiceError("superseded"))
+            return
+          }
           resolve()
         })
         .catch((error) => {
@@ -76,6 +112,11 @@ export class MpvPlaybackService implements PlaybackService {
           reject(error)
         })
     })
+
+    if (myGen !== this.playGeneration) {
+      child.kill("SIGTERM")
+      throw new PlaybackServiceError("superseded")
+    }
 
     this.process = child
     this.ipcPath = ipcPath
@@ -89,15 +130,25 @@ export class MpvPlaybackService implements PlaybackService {
     try {
       await this.waitForPlaybackReady()
     } catch (error) {
-      await this.stop()
+      if (myGen === this.playGeneration) {
+        // Real failure (not superseded) — discard route so next play rebuilds it.
+        this.currentRoute = null
+        this.currentRouteMode = null
+      }
+      await this.stopProcessOnly()
       throw error
+    }
+
+    if (myGen !== this.playGeneration) {
+      await this.stopProcessOnly()
+      throw new PlaybackServiceError("superseded")
     }
 
     child.once("exit", () => {
       this.process = null
       this.currentSession = null
       void this.cleanupSocketFile()
-      void this.cleanupAudioRoute()
+      // Route is intentionally kept alive for the next track.
     })
 
     return this.currentSession
@@ -158,6 +209,17 @@ export class MpvPlaybackService implements PlaybackService {
   }
 
   async stop(): Promise<void> {
+    await this.stopProcessOnly()
+    await this.cleanupAudioRoute()
+  }
+
+  getCurrentSession(): PlaybackSession | null {
+    return this.currentSession
+  }
+
+  // Stops just the mpv process and cleans up the IPC socket.
+  // The PulseAudio route is left intact so the next play() can reuse it.
+  private async stopProcessOnly(): Promise<void> {
     if (!this.process) {
       await this.cleanupSocketFile()
       return
@@ -176,11 +238,6 @@ export class MpvPlaybackService implements PlaybackService {
     this.process = null
     this.currentSession = null
     await this.cleanupSocketFile()
-    await this.cleanupAudioRoute()
-  }
-
-  getCurrentSession(): PlaybackSession | null {
-    return this.currentSession
   }
 
   private async sendCommand(command: unknown[], timeoutMs = DEFAULT_TIMEOUT_MS): Promise<void> {
@@ -313,6 +370,7 @@ export class MpvPlaybackService implements PlaybackService {
   private async cleanupAudioRoute(): Promise<void> {
     const route = this.currentRoute
     this.currentRoute = null
+    this.currentRouteMode = null
     if (!route) {
       return
     }
@@ -368,7 +426,7 @@ async function createAudioRoute(sessionId: string, mode: CavaSourceMode): Promis
 
     const loopbackTarget = defaultSink || "@DEFAULT_SINK@"
     loopbackModuleId =
-      (await runPactl(["load-module", "module-loopback", `source=${sinkName}.monitor`, `sink=${loopbackTarget}`, "latency_msec=60"])) || null
+      (await runPactl(["load-module", "module-loopback", `source=${sinkName}.monitor`, `sink=${loopbackTarget}`, "latency_msec=60", "adjust_time=0"])) || null
 
     const verified = Boolean(defaultSink) && defaultSink !== sinkName && Boolean(loopbackModuleId)
     if (mode === "ytui-strict" && !verified) {

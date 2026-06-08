@@ -9,9 +9,19 @@ import { playbackActions } from "./playback.slice"
 import type { AppServices, RootState } from "../../state/store/store.types"
 import type { Track } from "../../types/app.types"
 
+// Incremented synchronously each time a new play is requested.
+// Each in-flight runPlayTrackThunk captures its own value; if the value
+// changes before an await resumes, the earlier call was superseded and must
+// not write to shared state.
+let playGeneration = 0
+
 export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootState; extra: AppServices }>(
   "playback/play-track",
   async (track, { dispatch, getState, extra }) => {
+    // Increment synchronously so any concurrent in-flight call sees the change
+    // the next time it checks after an await.
+    const myGen = ++playGeneration
+
     const provider = extra.providerManager.getActive()
     const state = getState()
 
@@ -25,7 +35,17 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
 
     try {
       await dispatch(runStopVisualizerThunk())
+
+      // If a newer play was requested while we were stopping the visualizer, abort.
+      // The newer call's provider.playback.play() will stop the current mpv process.
+      if (myGen !== playGeneration) return
+
       await provider.playback.play(track, { cavaSourceMode: state.settings.cavaSourceMode })
+
+      // A newer play may have called provider.playback.stop() while we were waiting
+      // for mpv to start. If so, our session is already dead — don't write state.
+      if (myGen !== playGeneration) return
+
       dispatch(playbackActions.setPlaying(true))
       dispatch(libraryActions.prependToHistory(track))
       void dispatch(saveLibraryThunk())
@@ -35,8 +55,13 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
         await dispatch(runStartVisualizerThunk(session))
       }
 
+      if (myGen !== playGeneration) return
+
       dispatch(uiActions.setStatus({ message: `OK: playing ${track.title}`, level: "ok" }))
     } catch (error) {
+      // If superseded, a newer play already owns nowPlaying — don't clobber it.
+      if (myGen !== playGeneration) return
+
       dispatch(playbackActions.setNowPlaying(null))
       const message = error instanceof Error ? error.message : "Playback failed"
       dispatch(logsActions.addEntry({ level: "error", source: "playback", message }))

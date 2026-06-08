@@ -532,3 +532,53 @@ describe("runSyncPlaybackProgressThunk auto-advance", () => {
     expect(store.getState().playback.nowPlaying?.id).toBe(trackB.id)
   })
 })
+
+describe("runPlayTrackThunk concurrency", () => {
+  it("last call wins when two plays are dispatched concurrently", async () => {
+    const playOrder: string[] = []
+    let resolveFirst!: () => void
+    const firstStarted = new Promise<void>((r) => { resolveFirst = r })
+    let resolveFirstPlay!: () => void
+    const firstPlayGate = new Promise<void>((r) => { resolveFirstPlay = r })
+
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async (t) => {
+          playOrder.push(t.id)
+          if (t.id === track.id) {
+            resolveFirst()
+            // First play blocks until we release it, simulating slow mpv startup
+            await firstPlayGate
+          }
+        },
+        pause: async () => {},
+        resume: async () => {},
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+
+    // Start first play — it will stall inside provider.playback.play()
+    const first = store.dispatch(runPlayTrackThunk(track))
+
+    // Wait until first play has started, then dispatch second
+    await firstStarted
+    const second = store.dispatch(runPlayTrackThunk(trackB))
+
+    // Unblock the first play — it should detect it was superseded and abort
+    resolveFirstPlay()
+
+    await Promise.all([first, second])
+
+    // Only trackB (the last dispatched) should end up as nowPlaying
+    expect(store.getState().playback.nowPlaying?.id).toBe(trackB.id)
+    expect(store.getState().playback.playing).toBe(true)
+  })
+})
