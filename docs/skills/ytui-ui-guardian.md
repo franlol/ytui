@@ -12,14 +12,14 @@ Protect MVP UX consistency.
 
 ## Steps
 
-1. Validate NORMAL/SEARCH/ZEN behavior.
+1. Validate NORMAL/SEARCH/ZEN/LIBRARY/LOGS behavior.
 2. Validate help modal and command-line interaction.
 3. Validate sidebar control contract.
 4. Report user-visible regressions.
 
 ## Required Checks
 
-- views: NORMAL, SEARCH, ZEN
+- views: NORMAL, SEARCH, ZEN, LIBRARY, LOGS
 - help remains modal via `:?`
 - sidebar controlled by command
 - statusline behavior remains Vim-like
@@ -49,6 +49,10 @@ Protect MVP UX consistency.
 - theme picker opens as an absolute overlay on `:theme pick`; j/k/down/up navigate and apply live preview via `settingsActions.setTheme`; Escape restores `themePickerPreviousId` and closes; Enter confirms and closes; theme picker blocks all other key routes while open
 - HelpModal uses `Modal` base with `strategy: "centered"`, `widthFraction=0.68`, `minWidth=48`, `heightFraction=0.6`; ThemePicker uses `Modal` base with `strategy: "centered"`, `width=60`, `heightFraction=0.6`
 - all overlay components must use the shared `Modal` container (`src/components/modal/modal.tsx`); direct inline-chrome overlays are a regression
+- LOGS mode: `j`/`k` scroll entries one row at a time, `G` (shift+g) calls `logsActions.jumpToBottom()` and resumes follow mode; `Ctrl+D`/`Ctrl+U` page down/up by 10 rows; title bar shows `LOGS (N) [FOLLOW]` when `scrollOffset >= entries.length - 1`, `LOGS (N)` otherwise
+- Tab cycle includes LOGS: normal → search → zen → library → logs → normal
+- `:logs` switches to LOGS mode; `:logs clear` clears all entries and resets `scrollOffset` to 0
+- follow mode is implicit (no Redux flag): new entries auto-advance `scrollOffset` only when already at bottom; manual scroll up breaks follow mode; `G` restores it
 
 ## Blocking Criteria
 

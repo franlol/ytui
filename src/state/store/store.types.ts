@@ -1,5 +1,6 @@
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import type { LibraryState } from "../../features/library/library.types"
+import type { LogsState } from "../../features/logs/logs.slice.types"
 import type { PlaybackState } from "../../features/playback/playback.types"
 import type { PluginsState } from "../../features/plugins/plugins.types"
 import type { ProviderState } from "../../features/provider/provider.types"
@@ -27,6 +28,7 @@ export type RootState = {
   provider: ProviderState
   plugins: PluginsState
   library: LibraryState
+  logs: LogsState
   [key: string]: unknown
 }
 

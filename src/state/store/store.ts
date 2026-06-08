@@ -8,6 +8,7 @@ import { searchSlice } from "../../features/search/search.slice"
 import { settingsSlice } from "../../features/settings/settings.slice"
 import { uiSlice } from "../../features/ui/ui.slice"
 import { visualizerSlice } from "../../features/visualizer/visualizer.slice"
+import { logsSlice } from "../../features/logs/logs.slice"
 import { createReducerManager } from "../reducer-manager/reducer-manager"
 import type { AppServices, RootState } from "./store.types"
 
@@ -22,6 +23,7 @@ export function createAppStore(services: AppServices) {
     provider: providerSlice.reducer,
     plugins: pluginsSlice.reducer,
     library: librarySlice.reducer,
+    logs: logsSlice.reducer,
   })
 
   const store = configureStore({

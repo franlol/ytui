@@ -19,6 +19,7 @@ import { YoutubeProvider } from "../../services/providers/youtube/youtube.provid
 import { loadPluginManifests } from "../../services/plugins/plugin-loader/plugin-loader"
 import { loadUserThemes } from "../../services/themes/theme-loader/theme-loader"
 import { YtDlpSearchService } from "../../services/search/search.service"
+import { Logger } from "../../services/logger/logger"
 import { CavaVisualizerService } from "../../services/visualizer/cava-visualizer.service"
 import { createAppStore } from "../../state/store/store"
 import type { AppServices } from "../../state/store/store.types"
@@ -78,8 +79,26 @@ export async function createApp(): Promise<AppRuntime> {
     }
   }
 
+  const logger = new Logger(store.dispatch)
+
+  logger.info("config", `loaded — theme=${config.theme} provider=${config.providerDefault}`)
+
+  const activeProvider = providerManager.getActive()
+  logger.info("provider", `active: ${activeProvider?.info.id ?? "none"}`)
+
+  for (const plugin of loadedPlugins) {
+    if (plugin.error) {
+      logger.error(`plugin:${plugin.manifest.id}`, plugin.error)
+    } else if (plugin.enabled) {
+      logger.info(`plugin:${plugin.manifest.id}`, `loaded v${plugin.manifest.version}`)
+    } else {
+      logger.debug(`plugin:${plugin.manifest.id}`, "disabled")
+    }
+  }
+
   setupDefaultCommands(commandRegistry)
 
+  logger.info("app", "started")
 
   const renderer = await createCliRenderer({
     exitOnCtrlC: true,

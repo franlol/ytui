@@ -9,7 +9,7 @@ Manages all transient UI state that does not belong to a specific feature slice.
 
 ```typescript
 type UiState = {
-  mode: "normal" | "search" | "zen" | "library"
+  mode: "normal" | "search" | "zen" | "library" | "logs"
   sidebarCollapsed: boolean
   commandActive: boolean
   commandBuffer: string
@@ -29,7 +29,7 @@ type UiState = {
 | Action | Payload | Effect |
 |---|---|---|
 | `setMode` | `Mode` | Sets the active view mode |
-| `cycleMode` | — | Cycles normal → search → zen → library → normal |
+| `cycleMode` | — | Cycles normal → search → zen → library → logs → normal |
 | `setSidebarCollapsed` | `boolean` | Collapses/expands the sidebar |
 | `setCommandActive` | `boolean` | Opens/closes command input |
 | `setCommandBuffer` | `string` | Updates the in-progress command string |

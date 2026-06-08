@@ -1,4 +1,4 @@
-export type Mode = "normal" | "search" | "zen" | "library"
+export type Mode = "normal" | "search" | "zen" | "library" | "logs"
 
 export type StatusLevel = "ok" | "err" | "info"
 

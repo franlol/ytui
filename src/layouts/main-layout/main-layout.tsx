@@ -1,5 +1,6 @@
 import { CavaPanel } from "../../components/cava-panel/cava-panel"
 import { LibraryPanel } from "../../components/library-panel/library-panel"
+import { LogsPanel } from "../../components/logs-panel/logs-panel"
 import { NowPlaying } from "../../components/now-playing/now-playing"
 import { QueueList } from "../../components/queue-list/queue-list"
 import { ResultsList } from "../../components/results-list/results-list"
@@ -11,6 +12,7 @@ export function MainLayout(props: MainLayoutProps) {
   const mode = props.state.ui.mode
   const isSearch = mode === "search"
   const isLibrary = mode === "library"
+  const isLogs = mode === "logs"
   const visualizerStyle = props.visualizerStyleRegistry.getOrFallback(props.state.settings.cavaStyleId)
   const outerPaddingCols = 2
   const sidebarCols = props.state.ui.sidebarCollapsed ? 0 : 20
@@ -30,6 +32,18 @@ export function MainLayout(props: MainLayoutProps) {
 
   function renderListPanel() {
     if (!showListPanel) return null
+
+    if (isLogs) {
+      return (
+        <LogsPanel
+          entries={props.state.logs.entries}
+          scrollOffset={props.state.logs.scrollOffset}
+          heightRows={listHeightRows}
+          widthCols={listWidth}
+          theme={props.theme}
+        />
+      )
+    }
 
     if (isLibrary) {
       return (

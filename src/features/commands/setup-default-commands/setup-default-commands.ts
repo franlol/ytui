@@ -1,4 +1,5 @@
 import { libraryActions } from "../../library/library.slice"
+import { logsActions } from "../../logs/logs.slice"
 import { saveLibraryThunk } from "../../library/library.thunks"
 import { providerActions } from "../../provider/provider.slice"
 import { queueActions } from "../../queue/queue.slice"
@@ -282,6 +283,27 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
       }
 
       context.dispatch(uiActions.setStatus({ message: "ERR: use :plugin list|info <id>|reload", level: "err" }))
+    },
+  })
+
+  commandRegistry.register({
+    name: "logs",
+    description: "Switch to logs mode or manage log entries",
+    execute: (args, context) => {
+      const action = args[0]
+
+      if (!action) {
+        context.dispatch(uiActions.setMode("logs"))
+        return
+      }
+
+      if (action === "clear") {
+        context.dispatch(logsActions.clearLogs())
+        context.dispatch(uiActions.setStatus({ message: "OK: logs cleared", level: "ok" }))
+        return
+      }
+
+      context.dispatch(uiActions.setStatus({ message: "ERR: use :logs [clear]", level: "err" }))
     },
   })
 

@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
+import { logsActions } from "../logs/logs.slice"
 import { uiActions } from "../ui/ui.slice"
 import { visualizerActions } from "./visualizer.slice"
 import type { RootState, AppServices } from "../../state/store/store.types"
@@ -18,6 +19,7 @@ export const runStartVisualizerThunk = createAsyncThunk<void, PlaybackSession, {
       dispatch(visualizerActions.setUnavailable(true))
       dispatch(visualizerActions.setRunning(false))
       dispatch(visualizerActions.setError("ytui visualizer source unavailable"))
+      dispatch(logsActions.addEntry({ level: "warn", source: "visualizer", message: "CAVA source unavailable — disabled" }))
       return
     }
 
@@ -25,11 +27,13 @@ export const runStartVisualizerThunk = createAsyncThunk<void, PlaybackSession, {
       dispatch(visualizerActions.setUnavailable(true))
       dispatch(visualizerActions.setRunning(false))
       dispatch(visualizerActions.setError("ytui-isolated source could not be verified"))
+      dispatch(logsActions.addEntry({ level: "warn", source: "visualizer", message: "ytui-strict isolation check failed — CAVA disabled" }))
       dispatch(uiActions.setStatus({ message: "INFO: visualizer disabled (ytui isolation check failed)", level: "info" }))
       return
     }
 
     if (session.visualizerSourceMode === "ytui-best-effort" && !session.visualizerSourceVerified) {
+      dispatch(logsActions.addEntry({ level: "warn", source: "visualizer", message: "best-effort source unverified — CAVA may capture system audio" }))
       dispatch(uiActions.setStatus({ message: "INFO: visualizer running in best-effort source mode", level: "info" }))
     }
 
@@ -37,6 +41,7 @@ export const runStartVisualizerThunk = createAsyncThunk<void, PlaybackSession, {
     dispatch(visualizerActions.setUnavailable(false))
     dispatch(visualizerActions.setRunning(true))
     dispatch(visualizerActions.setError(null))
+    dispatch(logsActions.addEntry({ level: "info", source: "visualizer", message: `started (mode: ${session.visualizerSourceMode ?? "default"})` }))
 
     try {
       await extra.visualizerService.start(
@@ -52,6 +57,7 @@ export const runStartVisualizerThunk = createAsyncThunk<void, PlaybackSession, {
           if (currentSession === session.id) {
             dispatch(visualizerActions.setRunning(false))
             dispatch(visualizerActions.setError(error))
+            dispatch(logsActions.addEntry({ level: "error", source: "visualizer", message: `runtime error: ${error}` }))
           }
         },
       )
@@ -60,6 +66,7 @@ export const runStartVisualizerThunk = createAsyncThunk<void, PlaybackSession, {
       dispatch(visualizerActions.setRunning(false))
       dispatch(visualizerActions.setUnavailable(true))
       dispatch(visualizerActions.setError(message))
+      dispatch(logsActions.addEntry({ level: "error", source: "visualizer", message: `start failed: ${message}` }))
       dispatch(uiActions.setStatus({ message: `INFO: visualizer unavailable (${message})`, level: "info" }))
     }
   },

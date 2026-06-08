@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
+import { logsActions } from "../logs/logs.slice"
 import { uiActions } from "../ui/ui.slice"
 import { searchActions } from "./search.slice"
 import type { AppServices, RootState } from "../../state/store/store.types"
@@ -22,9 +23,11 @@ export const runSearchThunk = createAsyncThunk<void, void, { state: RootState; e
     try {
       const results = await provider.search.search(query, limit)
       dispatch(searchActions.searchSuccess(results))
+      dispatch(logsActions.addEntry({ level: "info", source: "search", message: `"${query}" → ${results.length} results` }))
       dispatch(uiActions.setStatus({ message: `OK: ${results.length} result(s)`, level: "ok" }))
     } catch (error) {
       const message = error instanceof Error ? error.message : "Search failed"
+      dispatch(logsActions.addEntry({ level: "error", source: "search", message: `"${query}" failed: ${message}` }))
       dispatch(searchActions.searchError(message))
       dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
     }

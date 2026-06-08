@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import { libraryActions } from "../library/library.slice"
 import { saveLibraryThunk } from "../library/library.thunks"
+import { logsActions } from "../logs/logs.slice"
 import { uiActions } from "../ui/ui.slice"
 import { runStartVisualizerThunk, runStopVisualizerThunk } from "../visualizer/visualizer.thunks"
 import { playbackActions } from "./playback.slice"
@@ -19,6 +20,7 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
     }
 
     dispatch(playbackActions.setNowPlaying(track))
+    dispatch(logsActions.addEntry({ level: "info", source: "playback", message: `play: "${track.title}" [${track.id}]` }))
 
     try {
       await dispatch(runStopVisualizerThunk())
@@ -36,6 +38,7 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
     } catch (error) {
       dispatch(playbackActions.setNowPlaying(null))
       const message = error instanceof Error ? error.message : "Playback failed"
+      dispatch(logsActions.addEntry({ level: "error", source: "playback", message }))
       dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
     }
   },
@@ -70,6 +73,7 @@ export const runTogglePauseResumeThunk = createAsyncThunk<void, void, { state: R
       dispatch(uiActions.setStatus({ message: "OK: playing", level: "ok" }))
     } catch (error) {
       const message = error instanceof Error ? error.message : "Pause/resume failed"
+      dispatch(logsActions.addEntry({ level: "error", source: "playback", message }))
       dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
     }
   },
@@ -102,6 +106,7 @@ export const runSeekPlaybackThunk = createAsyncThunk<void, { targetSec: number }
       dispatch(playbackActions.setElapsedSec(clampedTargetSec))
     } catch (error) {
       const message = error instanceof Error ? error.message : "Seek failed"
+      dispatch(logsActions.addEntry({ level: "error", source: "playback", message: `seek failed: ${message}` }))
       dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
     }
   },

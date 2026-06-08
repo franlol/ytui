@@ -11,6 +11,7 @@ import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
 import { settingsActions } from "../../features/settings/settings.slice"
+import { logsActions } from "../../features/logs/logs.slice"
 import { uiActions } from "../../features/ui/ui.slice"
 import { RootLayout } from "../../layouts/root-layout/root-layout"
 import type { ThemeDefinition } from "../../registries/themes/theme.registry.types"
@@ -314,6 +315,11 @@ export function AppRoot(props: AppRootProps) {
         return
       }
 
+      if (state.ui.mode === "logs") {
+        handleLogsKey(key, dispatch)
+        return
+      }
+
       if (state.ui.mode === "normal") {
         if (keySeqRef.current.pending) {
           const pending = keySeqRef.current.pending
@@ -489,6 +495,28 @@ function handleLibraryKey(
   }
   if (key.name === "d" && state.library.focus === "tracks") {
     pendingRef.current = "d"
+  }
+}
+
+function handleLogsKey(key: KeyEvent, dispatch: AppDispatch): void {
+  if (key.name === "j" || key.name === "down") {
+    dispatch(logsActions.scrollDown())
+    return
+  }
+  if (key.name === "k" || key.name === "up") {
+    dispatch(logsActions.scrollUp())
+    return
+  }
+  if (key.ctrl && key.name === "d") {
+    dispatch(logsActions.scrollPageDown(10))
+    return
+  }
+  if (key.ctrl && key.name === "u") {
+    dispatch(logsActions.scrollPageUp(10))
+    return
+  }
+  if (key.name === "g" && key.shift) {
+    dispatch(logsActions.jumpToBottom())
   }
 }
 
