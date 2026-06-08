@@ -28,6 +28,6 @@ Validate UX rules:
 - `:queue clear` empties the queue and resets cursor to 0
 - LOGS mode: `j`/`k` scroll entries, `G` (shift+g) jumps to bottom and resumes follow mode; title shows `[FOLLOW]` badge when `scrollOffset >= entries.length - 1`; new entries auto-advance offset only when at bottom (follow mode implicit)
 - `:logs` switches to LOGS mode; `:logs clear` empties the log buffer
-- Tab cycle order (forward): normal → search → zen → library → logs → normal; Shift+Tab reverses: normal → logs → library → zen → search → normal; implemented via `cycleMode` / `cycleModeBack` in the UI slice
+- Tab cycle order (forward): search → normal → zen → library → logs → search; Shift+Tab reverses: search → logs → library → zen → normal → search; implemented via `cycleMode` / `cycleModeBack` in the UI slice
 
 Prioritize user-visible regressions in output.

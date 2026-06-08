@@ -29,8 +29,8 @@ type UiState = {
 | Action | Payload | Effect |
 |---|---|---|
 | `setMode` | `Mode` | Sets the active view mode |
-| `cycleMode` | — | Cycles normal → search → zen → library → logs → normal (forward) |
-| `cycleModeBack` | — | Cycles normal → logs → library → zen → search → normal (reverse) |
+| `cycleMode` | — | Cycles search → normal → zen → library → logs → search (forward) |
+| `cycleModeBack` | — | Cycles search → logs → library → zen → normal → search (reverse) |
 | `setSidebarCollapsed` | `boolean` | Collapses/expands the sidebar |
 | `setCommandActive` | `boolean` | Opens/closes command input |
 | `setCommandBuffer` | `string` | Updates the in-progress command string |

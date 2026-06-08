@@ -25,12 +25,12 @@ export const uiSlice = createSlice({
       state.mode = action.payload
     },
     cycleMode(state) {
-      const order: Mode[] = ["normal", "search", "zen", "library", "logs"]
+      const order: Mode[] = ["search", "normal", "zen", "library", "logs"]
       const index = order.indexOf(state.mode)
       state.mode = order[(index + 1) % order.length]
     },
     cycleModeBack(state) {
-      const order: Mode[] = ["normal", "search", "zen", "library", "logs"]
+      const order: Mode[] = ["search", "normal", "zen", "library", "logs"]
       const index = order.indexOf(state.mode)
       state.mode = order[(index - 1 + order.length) % order.length]
     },

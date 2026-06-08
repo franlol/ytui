@@ -11,8 +11,8 @@ The logs screen is a read-only activity feed that captures structured events emi
 ## Mode
 
 `logs` is a first-class `Mode` (added to the `Mode` union in `src/types/app.types.ts`). It is reachable via:
-- `Tab` cycle: normal → search → zen → library → **logs** → normal
-- `Shift+Tab` cycle (reverse): normal → **logs** → library → zen → search → normal
+- `Tab` cycle: search → normal → zen → library → **logs** → search
+- `Shift+Tab` cycle (reverse): search → **logs** → library → zen → normal → search
 - `:logs` command
 - Sidebar navigation
 

@@ -1,6 +1,6 @@
 import type { SidebarProps } from "./sidebar.types"
 
-const navItems = ["normal", "search", "zen", "library", "logs", "settings"]
+const navItems = ["search", "normal", "zen", "library", "logs", "settings"]
 
 export function Sidebar(props: SidebarProps) {
   if (props.collapsed) {

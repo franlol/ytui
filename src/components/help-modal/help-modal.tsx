@@ -15,7 +15,7 @@ export function HelpModal(props: HelpModalProps) {
       heightFraction={0.6}
       positioning={{ strategy: "centered" }}
     >
-      <text content="Modes: NORMAL SEARCH ZEN" fg={props.theme.text} />
+      <text content="Modes: SEARCH NORMAL ZEN" fg={props.theme.text} />
       <text content="Tab: next mode  Shift+Tab: prev mode" fg={props.theme.text} />
       <text content="Esc: back to normal" fg={props.theme.text} />
       <text content=":sidebar toggle|on|off" fg={props.theme.text} />
