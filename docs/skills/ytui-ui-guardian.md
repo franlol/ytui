@@ -34,6 +34,9 @@ Protect MVP UX consistency.
 - SEARCH height budget accounts for border + padding so CAVA keeps a visible gap above statusline
 - UI state flow remains `react-redux` driven (no imperative render loop state syncing)
 - playback UX remains coherent: `Enter` in NORMAL plays selected queue track, `Ctrl+P` in SEARCH plays selected result, `Space` in NORMAL/ZEN pauses/resumes current track, `Space` in SEARCH appends a space character to the query
+- queue management keybinds are active only in NORMAL mode: `[n]gg` jumps to first (or nth) track, `[n]G` jumps to last (or nth) track, `[n]dd` removes n tracks from cursor (default 1); count prefix digits accumulate and reset on j/k or unrecognized sequence
+- `Ctrl+A` in SEARCH enqueues the selected result without switching mode; bare `a` must still append to the search query
+- `:queue clear` empties the queue and resets cursor to 0
 - statusline keeps mode/command context on the left; transient feedback messages render in a side slot without replacing mode/command
 - visualizer remains session-scoped to ytui playback (no global system-audio coupling) and unsupported runtime paths fail soft without UI crash
 - visualizer glyph rendering remains registry-driven with safe fallback style behavior when style ids are unknown

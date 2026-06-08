@@ -28,6 +28,24 @@ export const queueSlice = createSlice({
     moveSelectionUp(state) {
       state.selectedIndex = Math.max(0, state.selectedIndex - 1)
     },
+    enqueueTrack(state, action: PayloadAction<Track>) {
+      state.tracks.push(action.payload)
+    },
+    removeTrackRange(state, action: PayloadAction<{ index: number; count: number }>) {
+      const { index, count } = action.payload
+      const actual = Math.min(count, state.tracks.length - index)
+      state.tracks.splice(index, actual)
+      if (state.tracks.length === 0) {
+        state.selectedIndex = 0
+      } else {
+        const removedBefore = Math.min(actual, Math.max(0, state.selectedIndex - index))
+        state.selectedIndex = Math.min(state.selectedIndex - removedBefore, state.tracks.length - 1)
+      }
+    },
+    clearQueue(state) {
+      state.tracks = []
+      state.selectedIndex = 0
+    },
   },
 })
 

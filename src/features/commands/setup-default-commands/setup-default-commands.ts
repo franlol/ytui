@@ -1,4 +1,5 @@
 import { providerActions } from "../../provider/provider.slice"
+import { queueActions } from "../../queue/queue.slice"
 import { searchActions } from "../../search/search.slice"
 import { settingsActions } from "../../settings/settings.slice"
 import { uiActions } from "../../ui/ui.slice"
@@ -217,6 +218,19 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
       }
 
       context.dispatch(uiActions.setStatus({ message: "ERR: use :provider list|current|use <id>", level: "err" }))
+    },
+  })
+
+  commandRegistry.register({
+    name: "queue",
+    description: "Manage the queue",
+    execute: (args, context) => {
+      if (args[0] === "clear") {
+        context.dispatch(queueActions.clearQueue())
+        context.dispatch(uiActions.setStatus({ message: "OK: queue cleared", level: "ok" }))
+        return
+      }
+      context.dispatch(uiActions.setStatus({ message: "ERR: use :queue clear", level: "err" }))
     },
   })
 

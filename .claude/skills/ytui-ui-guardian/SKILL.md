@@ -21,6 +21,9 @@ metadata:
 - Verifies SEARCH panel height budgeting includes its chrome so CAVA does not touch the statusline.
 - Verifies UI behavior is driven through `@opentui/react` + `react-redux` state flow, not imperative render-loop syncing.
 - Verifies playback controls are discoverable and coherent (`Enter` NORMAL play, `Ctrl+P` SEARCH play, `Space` in NORMAL/ZEN pause/resume, `Space` in SEARCH appends to query).
+- Verifies queue management keybinds are NORMAL-mode-only: `[n]gg` → first/nth track, `[n]G` → last/nth track, `[n]dd` → remove n tracks from cursor; count digits accumulate and reset on j/k or unrecognized key.
+- Verifies `Ctrl+A` in SEARCH enqueues selected result without mode switch; bare `a` must still append to the search query.
+- Verifies `:queue clear` empties the queue and resets cursor to 0.
 - Verifies statusline preserves left mode/command context while feedback messages render in a side slot.
 - Verifies visualizer behavior stays scoped to active ytui playback session and unsupported runtime paths degrade gracefully.
 - Verifies visualizer glyph style behavior remains registry-driven with deterministic fallback for unknown style ids.

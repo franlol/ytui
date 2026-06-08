@@ -23,5 +23,8 @@ Validate UX rules:
 - results-list renders a spinner when `isLoading` is true; it must not render an empty list or frozen state during active search
 - now-playing track metadata (title/author) is set optimistically before audio initializes; a missing `nowPlaying` after a failed play is expected and not a regression
 - statusline `vol:` reflects live mpv volume synced via the 750 ms telemetry tick; a static initial value while a track plays is a regression
+- queue management keybinds must be NORMAL-mode-only: `[n]gg` → first/nth track, `[n]G` → last/nth track, `[n]dd` → remove n tracks from cursor; count digits accumulate and reset on j/k or unrecognized key
+- `Ctrl+A` in SEARCH enqueues selected result without mode switch; bare `a` must still append to the search query
+- `:queue clear` empties the queue and resets cursor to 0
 
 Prioritize user-visible regressions in output.

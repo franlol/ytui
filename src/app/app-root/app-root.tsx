@@ -50,6 +50,7 @@ export function AppRoot(props: AppRootProps) {
   const state = useSelector((root: RootState) => root)
   const dimensions = useTerminalDimensions()
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const keySeqRef = useRef<{ count: string; pending: string | null }>({ count: "", pending: null })
 
   useEffect(() => {
     const frameTimer = setInterval(() => {
@@ -133,6 +134,16 @@ export function AppRoot(props: AppRootProps) {
     },
     [dispatch],
   )
+
+  function consumeCount(fallback: number): number {
+    const n = parseInt(keySeqRef.current.count, 10)
+    keySeqRef.current.count = ""
+    return Number.isNaN(n) || n < 1 ? fallback : n
+  }
+
+  function resetKeySeq() {
+    keySeqRef.current = { count: "", pending: null }
+  }
 
   useKeyboard(
     (key) => {
@@ -237,6 +248,15 @@ export function AppRoot(props: AppRootProps) {
           return
         }
 
+        if (key.ctrl && key.name === "a") {
+          const track = state.search.results[state.search.selectedIndex]
+          if (track) {
+            dispatch(queueActions.enqueueTrack(track))
+            setStatusWithTimeout("OK: added to queue", "ok")
+          }
+          return
+        }
+
         if (key.sequence && isPrintable(key.sequence)) {
           dispatch(searchActions.setQuery(`${state.search.query}${key.sequence}`))
         }
@@ -244,17 +264,65 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (state.ui.mode === "normal") {
+        if (keySeqRef.current.pending) {
+          const pending = keySeqRef.current.pending
+          keySeqRef.current.pending = null
+
+          if (pending === "g" && key.name === "g" && !key.shift) {
+            const target = consumeCount(1) - 1
+            dispatch(queueActions.setSelectedIndex(target))
+            return
+          }
+          if (pending === "d" && key.name === "d") {
+            const count = consumeCount(1)
+            if (state.queue.tracks.length > 0) {
+              dispatch(queueActions.removeTrackRange({ index: state.queue.selectedIndex, count }))
+              setStatusWithTimeout(count === 1 ? "OK: removed" : `OK: removed ${count}`, "ok")
+            }
+            return
+          }
+          resetKeySeq()
+        }
+
+        if (key.sequence && /^[1-9]$/.test(key.sequence)) {
+          keySeqRef.current.count += key.sequence
+          return
+        }
+        if (key.sequence === "0" && keySeqRef.current.count.length > 0) {
+          keySeqRef.current.count += "0"
+          return
+        }
+
+        if (key.name === "g" && !key.shift) {
+          keySeqRef.current.pending = "g"
+          return
+        }
+
+        if (key.name === "g" && key.shift) {
+          const count = consumeCount(0)
+          const index = count > 0 ? count - 1 : Math.max(0, state.queue.tracks.length - 1)
+          dispatch(queueActions.setSelectedIndex(index))
+          return
+        }
+
+        if (key.name === "d") {
+          keySeqRef.current.pending = "d"
+          return
+        }
+
         if (key.name === "return") {
           playTrackFromState()
           return
         }
 
         if (key.name === "j" || key.name === "down") {
+          resetKeySeq()
           dispatch(queueActions.moveSelectionDown())
           return
         }
 
         if (key.name === "k" || key.name === "up") {
+          resetKeySeq()
           dispatch(queueActions.moveSelectionUp())
         }
       }
