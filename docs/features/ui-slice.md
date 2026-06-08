@@ -9,7 +9,7 @@ Manages all transient UI state that does not belong to a specific feature slice.
 
 ```typescript
 type UiState = {
-  mode: "normal" | "search" | "zen" | "library" | "logs"
+  mode: "normal" | "search" | "zen" | "library" | "logs" | "settings"
   sidebarCollapsed: boolean
   commandActive: boolean
   commandBuffer: string
@@ -21,6 +21,8 @@ type UiState = {
   playlistPickerSelectedIndex: number
   statusMessage: string | null
   statusLevel: "ok" | "err" | "info" | null
+  settingsCategoryIndex: number
+  settingsItemIndex: number
 }
 ```
 
@@ -29,8 +31,8 @@ type UiState = {
 | Action | Payload | Effect |
 |---|---|---|
 | `setMode` | `Mode` | Sets the active view mode |
-| `cycleMode` | — | Cycles search → normal → zen → library → logs → search (forward) |
-| `cycleModeBack` | — | Cycles search → logs → library → zen → normal → search (reverse) |
+| `cycleMode` | — | Cycles search → normal → zen → library → logs → settings → search (forward) |
+| `cycleModeBack` | — | Cycles search → settings → logs → library → zen → normal → search (reverse) |
 | `setSidebarCollapsed` | `boolean` | Collapses/expands the sidebar |
 | `setCommandActive` | `boolean` | Opens/closes command input |
 | `setCommandBuffer` | `string` | Updates the in-progress command string |
@@ -45,6 +47,11 @@ type UiState = {
 | `movePlaylistPickerUp` | — | Decrements `playlistPickerSelectedIndex`, clamped to `0` |
 | `setStatus` | `{ message, level }` | Sets a transient status message |
 | `clearStatus` | — | Clears the status message |
+| `moveSettingsCategoryNext` | `number` (category count) | Advances `settingsCategoryIndex` by 1, wrapping around; resets `settingsItemIndex` to 0 |
+| `moveSettingsCategoryPrev` | `number` (category count) | Moves `settingsCategoryIndex` back by 1, wrapping around; resets `settingsItemIndex` to 0 |
+| `moveSettingsItemDown` | `number` (item count) | Increments `settingsItemIndex`, clamped to `count - 1` |
+| `moveSettingsItemUp` | — | Decrements `settingsItemIndex`, clamped to 0 |
+| `resetSettingsNavigation` | — | Resets `settingsCategoryIndex` and `settingsItemIndex` to 0 |
 
 ## Overlay Lifecycle: Theme Picker
 
@@ -98,5 +105,19 @@ The picker list excludes the `"history"` playlist (History is auto-managed). `pl
 Only one overlay may be open at a time. Keyboard events are consumed by the first matching condition:
 
 ```
-helpOpen → themePickerOpen → playlistPickerOpen → commandActive → mode routing
+helpOpen → themePickerOpen → playlistPickerOpen → settings mode → commandActive → mode routing
 ```
+
+## SETTINGS Mode Navigation
+
+SETTINGS mode shows a horizontal tab strip of categories above a full-width item list.
+
+```
+h / [    → previous category tab (wraps around)
+l / ]    → next category tab (wraps around)
+j / k    → move item selection up / down
+← / →    → change value (cycle enum / toggle bool / ±step number)
+Escape   → exit SETTINGS mode (back to NORMAL)
+```
+
+Settings changes dispatch immediately (live preview). `settingsCategoryIndex` and `settingsItemIndex` track navigation state and are only meaningful while in SETTINGS mode.

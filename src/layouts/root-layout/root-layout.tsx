@@ -4,8 +4,51 @@ import { ThemePicker } from "../../components/theme-picker/theme-picker"
 import { Statusline } from "../../components/statusline/statusline"
 import { Topbar } from "../../components/topbar/topbar"
 import { MainLayout } from "../main-layout/main-layout"
+import { SettingsLayout } from "../settings-layout/settings-layout"
 import { ZenLayout } from "../zen-layout/zen-layout"
 import type { RootLayoutProps } from "./root-layout.types"
+
+function renderContent(props: RootLayoutProps) {
+  const { state, width, height, themeRegistry, progressStyleRegistry, visualizerStyleRegistry } = props
+  const theme = themeRegistry.getTokens(state.settings.themeId)
+
+  if (state.ui.mode === "zen") {
+    return (
+      <ZenLayout
+        state={state}
+        width={width}
+        height={height}
+        theme={theme}
+        visualizerStyleRegistry={visualizerStyleRegistry}
+      />
+    )
+  }
+
+  if (state.ui.mode === "settings") {
+    return (
+      <SettingsLayout
+        state={state}
+        width={width}
+        height={height}
+        themeRegistry={themeRegistry}
+        progressStyleRegistry={progressStyleRegistry}
+        visualizerStyleRegistry={visualizerStyleRegistry}
+      />
+    )
+  }
+
+  return (
+    <MainLayout
+      state={state}
+      width={width}
+      height={height}
+      theme={theme}
+      progressStyleRegistry={progressStyleRegistry}
+      visualizerStyleRegistry={visualizerStyleRegistry}
+      onSeekPlayback={props.onSeekPlayback}
+    />
+  )
+}
 
 export function RootLayout(props: RootLayoutProps) {
   const theme = props.themeRegistry.getTokens(props.state.settings.themeId)
@@ -13,25 +56,7 @@ export function RootLayout(props: RootLayoutProps) {
   return (
     <box id="screen" width="100%" height="100%" backgroundColor={theme.bg} flexDirection="column">
       <Topbar theme={theme} />
-      {props.state.ui.mode === "zen" ? (
-        <ZenLayout
-          state={props.state}
-          width={props.width}
-          height={props.height}
-          theme={theme}
-          visualizerStyleRegistry={props.visualizerStyleRegistry}
-        />
-      ) : (
-        <MainLayout
-          state={props.state}
-          width={props.width}
-          height={props.height}
-          theme={theme}
-          progressStyleRegistry={props.progressStyleRegistry}
-          visualizerStyleRegistry={props.visualizerStyleRegistry}
-          onSeekPlayback={props.onSeekPlayback}
-        />
-      )}
+      {renderContent(props)}
       <Statusline
         mode={props.state.ui.mode}
         commandActive={props.state.ui.commandActive}

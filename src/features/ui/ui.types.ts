@@ -13,4 +13,6 @@ export type UiState = {
   playlistPickerSelectedIndex: number
   statusMessage: string | null
   statusLevel: StatusLevel | null
+  settingsCategoryIndex: number
+  settingsItemIndex: number
 }

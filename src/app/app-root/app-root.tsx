@@ -17,6 +17,8 @@ import { RootLayout } from "../../layouts/root-layout/root-layout"
 import type { ThemeDefinition } from "../../registries/themes/theme.registry.types"
 import type { AppDispatch, RootState } from "../../state/store/store.types"
 import type { AppRootProps } from "./app-root.types"
+import { buildCategoryItems, SETTINGS_CATEGORIES } from "../../components/settings-panel/settings-panel.helpers"
+import { saveConfigThunk } from "../../features/settings/settings.thunks"
 
 function handleThemePickerKey(
   key: KeyEvent,
@@ -198,6 +200,12 @@ export function AppRoot(props: AppRootProps) {
           dispatch(uiActions.closePlaylistPicker())
         }
         return
+      }
+
+      if (state.ui.mode === "settings") {
+        if (handleSettingsKey(key, state, dispatch, props)) {
+          return
+        }
       }
 
       if (state.ui.commandActive) {
@@ -522,6 +530,55 @@ function handleLogsKey(key: KeyEvent, dispatch: AppDispatch): void {
   if (key.name === "g" && key.shift) {
     dispatch(logsActions.jumpToBottom())
   }
+}
+
+function handleSettingsKey(key: KeyEvent, state: RootState, dispatch: AppDispatch, props: AppRootProps): boolean {
+  const categoryId = SETTINGS_CATEGORIES[state.ui.settingsCategoryIndex]?.id ?? "appearance"
+  const descriptors = buildCategoryItems(
+    categoryId,
+    state,
+    {
+      themeRegistry: props.themeRegistry,
+      progressStyleRegistry: props.progressStyleRegistry,
+      visualizerStyleRegistry: props.visualizerStyleRegistry,
+    },
+    dispatch,
+  )
+  const itemCount = descriptors.length
+  const categoryCount = SETTINGS_CATEGORIES.length
+
+  if (key.name === "h" || key.name === "[" || key.sequence === "[") {
+    dispatch(uiActions.moveSettingsCategoryPrev(categoryCount))
+    return true
+  }
+  if (key.name === "l" || key.name === "]" || key.sequence === "]") {
+    dispatch(uiActions.moveSettingsCategoryNext(categoryCount))
+    return true
+  }
+  if (key.name === "j" || key.name === "down") {
+    dispatch(uiActions.moveSettingsItemDown(itemCount))
+    return true
+  }
+  if (key.name === "k" || key.name === "up") {
+    dispatch(uiActions.moveSettingsItemUp())
+    return true
+  }
+  if (key.name === "right") {
+    if (descriptors[state.ui.settingsItemIndex]?.onChange) {
+      descriptors[state.ui.settingsItemIndex].onChange!(dispatch, 1)
+      dispatch(saveConfigThunk())
+    }
+    return true
+  }
+  if (key.name === "left") {
+    if (descriptors[state.ui.settingsItemIndex]?.onChange) {
+      descriptors[state.ui.settingsItemIndex].onChange!(dispatch, -1)
+      dispatch(saveConfigThunk())
+    }
+    return true
+  }
+
+  return false
 }
 
 function isPrintable(sequence: string): boolean {

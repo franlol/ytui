@@ -47,6 +47,21 @@ export const settingsSlice = createSlice({
     setDefaultMode(state, action: PayloadAction<Mode>) {
       state.defaultMode = action.payload
     },
+    setCavaEnabled(state, action: PayloadAction<boolean>) {
+      state.cavaEnabled = action.payload
+    },
+    setCavaHeight(state, action: PayloadAction<number>) {
+      state.cavaHeight = Math.max(1, Math.min(8, action.payload))
+    },
+    setResultsLimit(state, action: PayloadAction<number>) {
+      state.resultsLimit = Math.max(10, Math.min(100, action.payload))
+    },
+    setStatusTimeout(state, action: PayloadAction<number>) {
+      state.statusTimeoutMs = Math.max(500, Math.min(10000, action.payload))
+    },
+    setUseAlternateScreen(state, action: PayloadAction<boolean>) {
+      state.useAlternateScreen = action.payload
+    },
   },
 })
 

@@ -5,7 +5,7 @@ export type AppConfig = {
   cavaStyle: string
   cavaSourceMode: "ytui-strict" | "ytui-best-effort" | "system"
   sidebar: "on" | "off"
-  defaultMode: "normal" | "search" | "zen"
+  defaultMode: "normal" | "search" | "zen" | "library" | "logs"
   resultsLimit: number
   cavaEnabled: boolean
   cavaHeight: number

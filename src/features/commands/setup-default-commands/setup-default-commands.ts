@@ -1,7 +1,7 @@
 import { libraryActions } from "../../library/library.slice"
 import { logsActions } from "../../logs/logs.slice"
 import { saveLibraryThunk } from "../../library/library.thunks"
-import { providerActions } from "../../provider/provider.slice"
+import { switchActiveProviderThunk } from "../../provider/provider.thunks"
 import { queueActions } from "../../queue/queue.slice"
 import { searchActions } from "../../search/search.slice"
 import { settingsActions } from "../../settings/settings.slice"
@@ -215,7 +215,7 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
           return
         }
 
-        context.dispatch(providerActions.setActiveProvider(providerId))
+        context.dispatch(switchActiveProviderThunk(providerId))
         context.dispatch(uiActions.setStatus({ message: `OK: provider ${providerId}`, level: "ok" }))
         return
       }

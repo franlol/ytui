@@ -107,7 +107,9 @@ function parseConfig(raw: string): Partial<AppConfig> {
     cavaStyle: entries.CAVA_STYLE ?? DEFAULT_CONFIG.cavaStyle,
     cavaSourceMode,
     sidebar: entries.SIDEBAR === "off" ? "off" : "on",
-    defaultMode: entries.DEFAULT_MODE === "search" || entries.DEFAULT_MODE === "zen" ? entries.DEFAULT_MODE : "normal",
+    defaultMode: (["normal", "search", "zen", "library", "logs"] as const).includes(entries.DEFAULT_MODE as never)
+      ? (entries.DEFAULT_MODE as "normal" | "search" | "zen" | "library" | "logs")
+      : "normal",
     resultsLimit: parseInteger(entries.RESULTS_LIMIT, DEFAULT_CONFIG.resultsLimit, 1, 100),
     cavaEnabled: parseBoolean(entries.CAVA_ENABLED, DEFAULT_CONFIG.cavaEnabled),
     cavaHeight: parseInteger(entries.CAVA_HEIGHT, DEFAULT_CONFIG.cavaHeight, 1, 8),

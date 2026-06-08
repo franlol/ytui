@@ -108,16 +108,16 @@ export async function createApp(): Promise<AppRuntime> {
   const root = createRoot(renderer as any)
   let started = false
 
-  function destroy() {
+  async function destroy() {
     const current = store.getState()
-    void configService.save({
+    await configService.save({
       configVersion: 1,
       theme: current.settings.themeId,
       progressStyle: current.settings.progressStyleId,
       cavaStyle: current.settings.cavaStyleId,
       cavaSourceMode: current.settings.cavaSourceMode,
       sidebar: current.ui.sidebarCollapsed ? "off" : "on",
-      defaultMode: current.settings.defaultMode,
+      defaultMode: current.settings.defaultMode === "settings" ? "normal" : current.settings.defaultMode,
       resultsLimit: current.settings.resultsLimit,
       cavaEnabled: current.settings.cavaEnabled,
       cavaHeight: current.settings.cavaHeight,
@@ -129,16 +129,11 @@ export async function createApp(): Promise<AppRuntime> {
       providersEnabled: current.provider.available.map((provider: ProviderInfo) => provider.id),
     })
 
-    void libraryService.save(current.library.playlists).catch(() => {
-      // best effort shutdown
-    })
-
-    void providerManager.getActive()?.playback?.stop().catch(() => {
-      // best effort shutdown
-    })
-    void visualizerService.stop().catch(() => {
-      // best effort shutdown
-    })
+    await Promise.allSettled([
+      libraryService.save(current.library.playlists),
+      providerManager.getActive()?.playback?.stop(),
+      visualizerService.stop(),
+    ])
 
     if (started) {
       root.unmount()

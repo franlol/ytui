@@ -15,6 +15,8 @@ const initialState: UiState = {
   playlistPickerSelectedIndex: 0,
   statusMessage: null,
   statusLevel: null,
+  settingsCategoryIndex: 0,
+  settingsItemIndex: 0,
 }
 
 export const uiSlice = createSlice({
@@ -25,12 +27,12 @@ export const uiSlice = createSlice({
       state.mode = action.payload
     },
     cycleMode(state) {
-      const order: Mode[] = ["search", "normal", "zen", "library", "logs"]
+      const order: Mode[] = ["search", "normal", "zen", "library", "logs", "settings"]
       const index = order.indexOf(state.mode)
       state.mode = order[(index + 1) % order.length]
     },
     cycleModeBack(state) {
-      const order: Mode[] = ["search", "normal", "zen", "library", "logs"]
+      const order: Mode[] = ["search", "normal", "zen", "library", "logs", "settings"]
       const index = order.indexOf(state.mode)
       state.mode = order[(index - 1 + order.length) % order.length]
     },
@@ -80,6 +82,24 @@ export const uiSlice = createSlice({
     clearStatus(state) {
       state.statusMessage = null
       state.statusLevel = null
+    },
+    moveSettingsCategoryNext(state, action: PayloadAction<number>) {
+      state.settingsCategoryIndex = (state.settingsCategoryIndex + 1) % action.payload
+      state.settingsItemIndex = 0
+    },
+    moveSettingsCategoryPrev(state, action: PayloadAction<number>) {
+      state.settingsCategoryIndex = (state.settingsCategoryIndex - 1 + action.payload) % action.payload
+      state.settingsItemIndex = 0
+    },
+    moveSettingsItemDown(state, action: PayloadAction<number>) {
+      state.settingsItemIndex = Math.min(state.settingsItemIndex + 1, action.payload - 1)
+    },
+    moveSettingsItemUp(state) {
+      state.settingsItemIndex = Math.max(0, state.settingsItemIndex - 1)
+    },
+    resetSettingsNavigation(state) {
+      state.settingsCategoryIndex = 0
+      state.settingsItemIndex = 0
     },
   },
 })

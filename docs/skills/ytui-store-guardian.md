@@ -24,6 +24,8 @@ Enforce Redux Toolkit + thunk + reducer manager architecture.
 - typed service interfaces used by thunks
 - dynamic reducer manager supports plugin slices
 - plugin slice keys are namespaced
+- `saveConfigThunk`: persists current settings state to disk via `extra.configService.save(state.settings)`; must not be dispatched from reducers or UI components directly — only from `app-root` key handling on settings exit
+- `switchActiveProviderThunk`: the only valid way to change the active provider at runtime; validates `id` exists in `state.provider.available`, calls `extra.providerManager.setActive(id)`, then dispatches `providerActions.setActiveProvider(id)`; dispatching `providerActions.setActiveProvider` directly without the thunk leaves `providerManager` out of sync and is a bug
 
 ## Blocking Criteria
 

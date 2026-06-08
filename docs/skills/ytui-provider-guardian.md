@@ -22,6 +22,7 @@ Enforce provider-capability architecture.
 - provider logic behind `MusicProvider` interfaces
 - no provider-specific logic in UI components
 - active provider selected via provider manager
+- runtime provider switching must go through `switchActiveProviderThunk`; dispatching `providerActions.setActiveProvider` directly bypasses `providerManager.setActive()` and leaves in-memory provider state stale — flag any direct dispatch as a bug
 - capability checks before feature use
 - external provider integrations (for example `yt-dlp`) are wrapped by typed services, not called from UI/thunks directly
 - playback controls (play/pause/resume/stop) are invoked through provider capability contracts, not directly from UI components
