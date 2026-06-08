@@ -61,6 +61,7 @@ function makeServices(provider: MusicProvider): AppServices {
     commandRegistry: {} as any,
     themeRegistry: {} as any,
     progressStyleRegistry: {} as any,
+    libraryService: { load: async () => [], save: async () => {} },
   }
 }
 

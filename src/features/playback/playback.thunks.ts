@@ -1,4 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
+import { libraryActions } from "../library/library.slice"
+import { saveLibraryThunk } from "../library/library.thunks"
 import { uiActions } from "../ui/ui.slice"
 import { runStartVisualizerThunk, runStopVisualizerThunk } from "../visualizer/visualizer.thunks"
 import { playbackActions } from "./playback.slice"
@@ -22,6 +24,8 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
       await dispatch(runStopVisualizerThunk())
       await provider.playback.play(track, { cavaSourceMode: state.settings.cavaSourceMode })
       dispatch(playbackActions.setPlaying(true))
+      dispatch(libraryActions.prependToHistory(track))
+      void dispatch(saveLibraryThunk())
 
       const session = provider.playback.getPlaybackSession?.()
       if (session) {

@@ -1,3 +1,5 @@
+import { libraryActions } from "../../library/library.slice"
+import { saveLibraryThunk } from "../../library/library.thunks"
 import { providerActions } from "../../provider/provider.slice"
 import { queueActions } from "../../queue/queue.slice"
 import { searchActions } from "../../search/search.slice"
@@ -280,6 +282,77 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
       }
 
       context.dispatch(uiActions.setStatus({ message: "ERR: use :plugin list|info <id>|reload", level: "err" }))
+    },
+  })
+
+  commandRegistry.register({
+    name: "playlist",
+    description: "Manage library playlists",
+    execute: (args, context) => {
+      const action = args[0] ?? ""
+
+      if (action === "new") {
+        const name = args.slice(1).join(" ").trim()
+        if (!name) {
+          context.dispatch(uiActions.setStatus({ message: "ERR: use :playlist new <name>", level: "err" }))
+          return
+        }
+        const id = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+        const existing = context.getState().library.playlists.some((p) => p.id === id)
+        if (existing) {
+          context.dispatch(uiActions.setStatus({ message: `ERR: playlist "${id}" already exists`, level: "err" }))
+          return
+        }
+        context.dispatch(libraryActions.createPlaylist({ id, name }))
+        context.dispatch(saveLibraryThunk())
+        context.dispatch(uiActions.setStatus({ message: `OK: created playlist "${name}"`, level: "ok" }))
+        return
+      }
+
+      if (action === "delete") {
+        const playlistName = args.slice(1).join(" ").trim()
+        if (!playlistName) {
+          context.dispatch(uiActions.setStatus({ message: "ERR: use :playlist delete <name>", level: "err" }))
+          return
+        }
+        const playlist = context.getState().library.playlists.find((p) => p.name === playlistName)
+        if (!playlist) {
+          context.dispatch(uiActions.setStatus({ message: `ERR: playlist "${playlistName}" not found`, level: "err" }))
+          return
+        }
+        if (playlist.readonly) {
+          context.dispatch(uiActions.setStatus({ message: `ERR: "${playlist.name}" is a built-in playlist`, level: "err" }))
+          return
+        }
+        context.dispatch(libraryActions.deletePlaylist(playlist.id))
+        context.dispatch(saveLibraryThunk())
+        context.dispatch(uiActions.setStatus({ message: `OK: deleted "${playlist.name}"`, level: "ok" }))
+        return
+      }
+
+      if (action === "rename") {
+        const oldName = args[1]
+        const newName = args.slice(2).join(" ").trim()
+        if (!oldName || !newName) {
+          context.dispatch(uiActions.setStatus({ message: "ERR: use :playlist rename <name> <new name>", level: "err" }))
+          return
+        }
+        const playlist = context.getState().library.playlists.find((p) => p.name === oldName)
+        if (!playlist) {
+          context.dispatch(uiActions.setStatus({ message: `ERR: playlist "${oldName}" not found`, level: "err" }))
+          return
+        }
+        if (playlist.readonly) {
+          context.dispatch(uiActions.setStatus({ message: `ERR: "${playlist.name}" is a built-in playlist`, level: "err" }))
+          return
+        }
+        context.dispatch(libraryActions.renamePlaylist({ id: playlist.id, name: newName }))
+        context.dispatch(saveLibraryThunk())
+        context.dispatch(uiActions.setStatus({ message: `OK: renamed to "${newName}"`, level: "ok" }))
+        return
+      }
+
+      context.dispatch(uiActions.setStatus({ message: "ERR: use :playlist new|delete|rename", level: "err" }))
     },
   })
 }

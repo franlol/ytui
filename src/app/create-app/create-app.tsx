@@ -3,6 +3,7 @@ import { createRoot } from "@opentui/react"
 import { Provider } from "react-redux"
 import { AppRoot } from "../app-root/app-root"
 import { setupDefaultCommands } from "../../features/commands/setup-default-commands/setup-default-commands"
+import { loadLibraryThunk } from "../../features/library/library.thunks"
 import { pluginsActions } from "../../features/plugins/plugins.slice"
 import { providerActions } from "../../features/provider/provider.slice"
 import { settingsActions } from "../../features/settings/settings.slice"
@@ -12,6 +13,7 @@ import { createDefaultProgressStyleRegistry } from "../../registries/progress-st
 import { createDefaultThemeRegistry } from "../../registries/themes/theme.registry"
 import { createDefaultVisualizerStyleRegistry } from "../../registries/visualizer-styles/visualizer-style.registry"
 import { FileConfigService } from "../../services/config/config.service"
+import { FileLibraryService } from "../../services/library/library.service"
 import { DefaultProviderManager } from "../../services/providers/provider-manager/provider-manager"
 import { YoutubeProvider } from "../../services/providers/youtube/youtube.provider"
 import { loadPluginManifests } from "../../services/plugins/plugin-loader/plugin-loader"
@@ -25,6 +27,7 @@ import type { AppRuntime } from "./create-app.types"
 
 export async function createApp(): Promise<AppRuntime> {
   const configService = new FileConfigService()
+  const libraryService = new FileLibraryService()
   const commandRegistry = new CommandRegistry()
   const themeRegistry = createDefaultThemeRegistry()
   const progressStyleRegistry = createDefaultProgressStyleRegistry()
@@ -37,6 +40,7 @@ export async function createApp(): Promise<AppRuntime> {
 
   const services: AppServices = {
     configService,
+    libraryService,
     providerManager,
     visualizerService,
     commandRegistry,
@@ -51,6 +55,7 @@ export async function createApp(): Promise<AppRuntime> {
   store.dispatch(settingsActions.applyConfig(config))
   store.dispatch(uiActions.setSidebarCollapsed(config.sidebar === "off"))
   store.dispatch(uiActions.setMode(config.defaultMode))
+  void store.dispatch(loadLibraryThunk())
   providerManager.setActive(config.providerDefault)
   store.dispatch(providerActions.setProviders(providerManager.list().map((provider) => provider.info)))
   store.dispatch(providerActions.setActiveProvider(providerManager.getActive()?.info.id ?? "youtube"))
@@ -103,6 +108,10 @@ export async function createApp(): Promise<AppRuntime> {
       plugins: [],
       providerDefault: current.provider.activeProviderId,
       providersEnabled: current.provider.available.map((provider: ProviderInfo) => provider.id),
+    })
+
+    void libraryService.save(current.library.playlists).catch(() => {
+      // best effort shutdown
     })
 
     void providerManager.getActive()?.playback?.stop().catch(() => {

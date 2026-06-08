@@ -1,4 +1,5 @@
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
+import type { LibraryState } from "../../features/library/library.types"
 import type { PlaybackState } from "../../features/playback/playback.types"
 import type { PluginsState } from "../../features/plugins/plugins.types"
 import type { ProviderState } from "../../features/provider/provider.types"
@@ -12,6 +13,7 @@ import type { ProgressStyleRegistry } from "../../registries/progress-styles/pro
 import type { ThemeRegistry } from "../../registries/themes/theme.registry"
 import type { VisualizerStyleRegistry } from "../../registries/visualizer-styles/visualizer-style.registry"
 import type { ConfigService } from "../../services/config/config.service.types"
+import type { LibraryService } from "../../services/library/library.service.types"
 import type { ProviderManager } from "../../services/providers/provider-manager/provider-manager.types"
 import type { VisualizerService } from "../../services/visualizer/cava-visualizer.service.types"
 
@@ -24,11 +26,13 @@ export type RootState = {
   settings: SettingsState
   provider: ProviderState
   plugins: PluginsState
+  library: LibraryState
   [key: string]: unknown
 }
 
 export type AppServices = {
   configService: ConfigService
+  libraryService: LibraryService
   providerManager: ProviderManager
   visualizerService: VisualizerService
   commandRegistry: CommandRegistry

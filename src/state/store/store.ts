@@ -1,4 +1,5 @@
 import { configureStore, type Reducer } from "@reduxjs/toolkit"
+import { librarySlice } from "../../features/library/library.slice"
 import { playbackSlice } from "../../features/playback/playback.slice"
 import { pluginsSlice } from "../../features/plugins/plugins.slice"
 import { providerSlice } from "../../features/provider/provider.slice"
@@ -20,6 +21,7 @@ export function createAppStore(services: AppServices) {
     settings: settingsSlice.reducer,
     provider: providerSlice.reducer,
     plugins: pluginsSlice.reducer,
+    library: librarySlice.reducer,
   })
 
   const store = configureStore({

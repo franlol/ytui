@@ -43,6 +43,7 @@ function makeServices() {
     commandRegistry: {} as any,
     themeRegistry: {} as any,
     progressStyleRegistry: {} as any,
+    libraryService: { load: async () => [], save: async () => {} },
   }
 
   return {

@@ -11,6 +11,8 @@ const initialState: UiState = {
   themePickerOpen: false,
   themePickerSelectedIndex: 0,
   themePickerPreviousId: "",
+  playlistPickerOpen: false,
+  playlistPickerSelectedIndex: 0,
   statusMessage: null,
   statusLevel: null,
 }
@@ -23,7 +25,7 @@ export const uiSlice = createSlice({
       state.mode = action.payload
     },
     cycleMode(state) {
-      const order: Mode[] = ["normal", "search", "zen"]
+      const order: Mode[] = ["normal", "search", "zen", "library"]
       const index = order.indexOf(state.mode)
       state.mode = order[(index + 1) % order.length]
     },
@@ -46,6 +48,19 @@ export const uiSlice = createSlice({
     },
     closeThemePicker(state) {
       state.themePickerOpen = false
+    },
+    openPlaylistPicker(state, action: PayloadAction<number>) {
+      state.playlistPickerOpen = true
+      state.playlistPickerSelectedIndex = action.payload
+    },
+    closePlaylistPicker(state) {
+      state.playlistPickerOpen = false
+    },
+    movePlaylistPickerDown(state, action: PayloadAction<number>) {
+      state.playlistPickerSelectedIndex = Math.min(state.playlistPickerSelectedIndex + 1, action.payload - 1)
+    },
+    movePlaylistPickerUp(state) {
+      state.playlistPickerSelectedIndex = Math.max(0, state.playlistPickerSelectedIndex - 1)
     },
     moveThemePickerDown(state, action: PayloadAction<number>) {
       state.themePickerSelectedIndex = Math.min(state.themePickerSelectedIndex + 1, action.payload - 1)

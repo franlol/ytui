@@ -1,4 +1,5 @@
 import { HelpModal } from "../../components/help-modal/help-modal"
+import { PlaylistPicker } from "../../components/playlist-picker/playlist-picker"
 import { ThemePicker } from "../../components/theme-picker/theme-picker"
 import { Statusline } from "../../components/statusline/statusline"
 import { Topbar } from "../../components/topbar/topbar"
@@ -48,6 +49,15 @@ export function RootLayout(props: RootLayoutProps) {
         <ThemePicker
           themes={props.themeRegistry.list()}
           selectedIndex={props.state.ui.themePickerSelectedIndex}
+          theme={theme}
+          screenWidth={props.width}
+          screenHeight={props.height}
+        />
+      ) : null}
+      {props.state.ui.playlistPickerOpen ? (
+        <PlaylistPicker
+          playlists={props.state.library.playlists.filter((p) => p.id !== "history")}
+          selectedIndex={props.state.ui.playlistPickerSelectedIndex}
           theme={theme}
           screenWidth={props.width}
           screenHeight={props.height}

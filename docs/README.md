@@ -39,5 +39,7 @@ UI runtime note:
 - `ytui-strict` disables visualizer when ytui-isolated source cannot be verified; `system` intentionally visualizes global system audio.
 - NOW PLAYING progress bar supports click-to-seek; clicks outside the rendered bar are ignored and provider backends without seek capability fail with a status error.
 - NOW PLAYING time/progress prefers runtime playback telemetry (`mpv` time-pos/duration via provider playback capability) and falls back to local tick updates only when runtime telemetry is unavailable.
+- Library (playlists + history) persists to `~/.config/ytui/library.json`; managed via `:playlist new|delete|rename` and the `Ctrl+S` playlist picker overlay. See `docs/features/library.md`.
+- Command parser supports quoted tokens (`"name with spaces"`) for all commands, enabling multi-word playlist names.
 
 Start here, then read `docs/policies/agent-only-contributions.md`.

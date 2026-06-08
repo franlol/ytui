@@ -1,4 +1,5 @@
 import { CavaPanel } from "../../components/cava-panel/cava-panel"
+import { LibraryPanel } from "../../components/library-panel/library-panel"
 import { NowPlaying } from "../../components/now-playing/now-playing"
 import { QueueList } from "../../components/queue-list/queue-list"
 import { ResultsList } from "../../components/results-list/results-list"
@@ -7,7 +8,9 @@ import { Sidebar } from "../../components/sidebar/sidebar"
 import type { MainLayoutProps } from "./main-layout.types"
 
 export function MainLayout(props: MainLayoutProps) {
-  const isSearch = props.state.ui.mode === "search"
+  const mode = props.state.ui.mode
+  const isSearch = mode === "search"
+  const isLibrary = mode === "library"
   const visualizerStyle = props.visualizerStyleRegistry.getOrFallback(props.state.settings.cavaStyleId)
   const outerPaddingCols = 2
   const sidebarCols = props.state.ui.sidebarCollapsed ? 0 : 20
@@ -25,38 +28,59 @@ export function MainLayout(props: MainLayoutProps) {
   const showListPanel = listHeightRows >= 3
   const listWidth = Math.max(10, contentWidth - 4)
 
+  function renderListPanel() {
+    if (!showListPanel) return null
+
+    if (isLibrary) {
+      return (
+        <LibraryPanel
+          playlists={props.state.library.playlists}
+          selectedPlaylistIndex={props.state.library.selectedPlaylistIndex}
+          selectedTrackIndex={props.state.library.selectedTrackIndex}
+          focus={props.state.library.focus}
+          heightRows={listHeightRows}
+          widthCols={listWidth}
+          nowPlayingTrackId={props.state.playback.nowPlaying?.id}
+          theme={props.theme}
+        />
+      )
+    }
+
+    if (isSearch) {
+      return (
+        <ResultsList
+          totalCount={props.state.search.results.length}
+          heightRows={listHeightRows}
+          theme={props.theme}
+          tracks={props.state.search.results}
+          selectedIndex={props.state.search.selectedIndex}
+          widthCols={listWidth}
+          isLoading={props.state.search.isLoading}
+          nowPlayingTrackId={props.state.playback.nowPlaying?.id}
+        />
+      )
+    }
+
+    return (
+      <QueueList
+        totalCount={props.state.queue.tracks.length}
+        heightRows={listHeightRows}
+        theme={props.theme}
+        tracks={props.state.queue.tracks}
+        selectedIndex={props.state.queue.selectedIndex}
+        widthCols={listWidth}
+        nowPlayingTrackId={props.state.playback.nowPlaying?.id}
+        runtimeDurationSec={props.state.playback.durationSec}
+      />
+    )
+  }
+
   return (
     <box width="100%" flexGrow={1} flexDirection="row" gap={1} padding={1}>
       <Sidebar collapsed={props.state.ui.sidebarCollapsed} mode={props.state.ui.mode} theme={props.theme} />
       <box flexGrow={1} flexDirection="column" gap={1}>
         {isSearch ? <SearchInput query={props.state.search.query} theme={props.theme} /> : null}
-        {showListPanel
-          ? isSearch
-            ? (
-                <ResultsList
-                  totalCount={props.state.search.results.length}
-                  heightRows={listHeightRows}
-                  theme={props.theme}
-                  tracks={props.state.search.results}
-                  selectedIndex={props.state.search.selectedIndex}
-                  widthCols={listWidth}
-                  isLoading={props.state.search.isLoading}
-                  nowPlayingTrackId={props.state.playback.nowPlaying?.id}
-                />
-              )
-            : (
-                <QueueList
-                  totalCount={props.state.queue.tracks.length}
-                  heightRows={listHeightRows}
-                  theme={props.theme}
-                  tracks={props.state.queue.tracks}
-                  selectedIndex={props.state.queue.selectedIndex}
-                  widthCols={listWidth}
-                  nowPlayingTrackId={props.state.playback.nowPlaying?.id}
-                  runtimeDurationSec={props.state.playback.durationSec}
-                />
-              )
-          : null}
+        {renderListPanel()}
         <NowPlaying
           track={props.state.playback.nowPlaying}
           elapsedSec={props.state.playback.elapsedSec}

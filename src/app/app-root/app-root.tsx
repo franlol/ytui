@@ -1,8 +1,11 @@
 import type { KeyEvent } from "@opentui/core"
 import { useKeyboard, useTerminalDimensions } from "@opentui/react"
-import { useCallback, useEffect, useRef } from "react"
+import { type MutableRefObject, useCallback, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import type { Track } from "../../types/app.types"
 import { parseCommandInput } from "../../features/commands/command-parser/command-parser"
+import { libraryActions } from "../../features/library/library.slice"
+import { saveLibraryThunk } from "../../features/library/library.thunks"
 import { runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
 import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
@@ -51,6 +54,8 @@ export function AppRoot(props: AppRootProps) {
   const dimensions = useTerminalDimensions()
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keySeqRef = useRef<{ count: string; pending: string | null }>({ count: "", pending: null })
+  const pendingTrackRef = useRef<Track | null>(null)
+  const libraryKeyPendingRef = useRef<string | null>(null)
 
   useEffect(() => {
     const frameTimer = setInterval(() => {
@@ -165,6 +170,35 @@ export function AppRoot(props: AppRootProps) {
         return
       }
 
+      if (state.ui.playlistPickerOpen) {
+        const pickable = state.library.playlists.filter((p) => p.id !== "history")
+        if (key.name === "j" || key.name === "down") {
+          dispatch(uiActions.movePlaylistPickerDown(pickable.length))
+          return
+        }
+        if (key.name === "k" || key.name === "up") {
+          dispatch(uiActions.movePlaylistPickerUp())
+          return
+        }
+        if (key.name === "return") {
+          const target = pickable[state.ui.playlistPickerSelectedIndex]
+          const track = pendingTrackRef.current
+          if (target && track) {
+            dispatch(libraryActions.addTrackToPlaylist({ playlistId: target.id, track }))
+            dispatch(saveLibraryThunk())
+            setStatusWithTimeout(`OK: saved to "${target.name}"`, "ok")
+          }
+          pendingTrackRef.current = null
+          dispatch(uiActions.closePlaylistPicker())
+          return
+        }
+        if (key.name === "escape") {
+          pendingTrackRef.current = null
+          dispatch(uiActions.closePlaylistPicker())
+        }
+        return
+      }
+
       if (state.ui.commandActive) {
         if (key.name === "escape") {
           dispatch(uiActions.setCommandActive(false))
@@ -257,9 +291,26 @@ export function AppRoot(props: AppRootProps) {
           return
         }
 
+        if (key.ctrl && key.name === "s") {
+          const track = state.search.results[state.search.selectedIndex]
+          if (track) {
+            pendingTrackRef.current = track
+            dispatch(uiActions.openPlaylistPicker(0))
+          }
+          return
+        }
+
         if (key.sequence && isPrintable(key.sequence)) {
           dispatch(searchActions.setQuery(`${state.search.query}${key.sequence}`))
         }
+        return
+      }
+
+      if (state.ui.mode === "library") {
+        handleLibraryKey(key, state, dispatch, setStatusWithTimeout, playTrackFromState, libraryKeyPendingRef, (track) => {
+          pendingTrackRef.current = track
+          dispatch(uiActions.openPlaylistPicker(0))
+        })
         return
       }
 
@@ -315,6 +366,15 @@ export function AppRoot(props: AppRootProps) {
           return
         }
 
+        if (key.ctrl && key.name === "s") {
+          const track = state.queue.tracks[state.queue.selectedIndex]
+          if (track) {
+            pendingTrackRef.current = track
+            dispatch(uiActions.openPlaylistPicker(0))
+          }
+          return
+        }
+
         if (key.name === "j" || key.name === "down") {
           resetKeySeq()
           dispatch(queueActions.moveSelectionDown())
@@ -341,6 +401,95 @@ export function AppRoot(props: AppRootProps) {
       onSeekPlayback={seekPlayback}
     />
   )
+}
+
+function handleLibraryKey(
+  key: KeyEvent,
+  state: RootState,
+  dispatch: AppDispatch,
+  setStatus: (message: string, level?: "ok" | "err" | "info") => void,
+  playTrackFromState: () => void,
+  pendingRef: MutableRefObject<string | null>,
+  openPickerForTrack: (track: Track) => void,
+): void {
+  // Two-key sequences (dd to remove track)
+  if (pendingRef.current) {
+    const pending = pendingRef.current
+    pendingRef.current = null
+
+    if (pending === "d" && key.name === "d" && state.library.focus === "tracks") {
+      const playlist = state.library.playlists[state.library.selectedPlaylistIndex]
+      const track = playlist?.tracks[state.library.selectedTrackIndex]
+      if (track && playlist) {
+        dispatch(libraryActions.removeTrackFromPlaylist({ playlistId: playlist.id, trackId: track.id }))
+        dispatch(saveLibraryThunk())
+        setStatus("OK: removed", "ok")
+      }
+      return
+    }
+    // Unrecognized second key — fall through to handle normally
+  }
+
+  if (key.name === "h" || key.name === "left") {
+    dispatch(libraryActions.setFocus("playlists"))
+    return
+  }
+  if (key.name === "l" || key.name === "right") {
+    dispatch(libraryActions.setFocus("tracks"))
+    return
+  }
+  if (key.name === "j" || key.name === "down") {
+    if (state.library.focus === "playlists") {
+      dispatch(libraryActions.movePlaylistDown())
+    } else {
+      dispatch(libraryActions.moveTrackDown())
+    }
+    return
+  }
+  if (key.name === "k" || key.name === "up") {
+    if (state.library.focus === "playlists") {
+      dispatch(libraryActions.movePlaylistUp())
+    } else {
+      dispatch(libraryActions.moveTrackUp())
+    }
+    return
+  }
+  if (key.name === "return") {
+    if (state.library.focus === "playlists") {
+      dispatch(libraryActions.setFocus("tracks"))
+    } else {
+      const playlist = state.library.playlists[state.library.selectedPlaylistIndex]
+      const track = playlist?.tracks[state.library.selectedTrackIndex]
+      if (track) dispatch(runPlayTrackThunk(track))
+    }
+    return
+  }
+  if (key.ctrl && key.name === "p") {
+    const playlist = state.library.playlists[state.library.selectedPlaylistIndex]
+    const track = playlist?.tracks[state.library.selectedTrackIndex]
+    if (track) dispatch(runPlayTrackThunk(track))
+    return
+  }
+  if (key.ctrl && key.name === "a") {
+    const playlist = state.library.playlists[state.library.selectedPlaylistIndex]
+    const track = playlist?.tracks[state.library.selectedTrackIndex]
+    if (track) {
+      dispatch(queueActions.enqueueTrack(track))
+      setStatus("OK: added to queue", "ok")
+    }
+    return
+  }
+  if (key.ctrl && key.name === "s") {
+    const playlist = state.library.playlists[state.library.selectedPlaylistIndex]
+    const track = playlist?.tracks[state.library.selectedTrackIndex]
+    if (track) {
+      openPickerForTrack(track)
+    }
+    return
+  }
+  if (key.name === "d" && state.library.focus === "tracks") {
+    pendingRef.current = "d"
+  }
 }
 
 function isPrintable(sequence: string): boolean {

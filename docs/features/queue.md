@@ -36,13 +36,16 @@ These keybinds are handled in `src/app/app-root/app-root.tsx` via a count-buffer
 | `[n]G` | Jump to track `n` (default: last track) |
 | `[n]dd` | Delete `n` tracks from cursor (default: 1) |
 | `Enter` | Play selected track |
+| `Ctrl+S` | Open playlist picker to save selected track to a playlist |
 | `j` / `k` | Move cursor down / up (resets key sequence) |
 
-## SEARCH Mode Keybind
+## SEARCH Mode Keybinds
 
 | Keybind | Action |
 |---|---|
+| `Ctrl+P` | Play selected search result |
 | `Ctrl+A` | Enqueue selected result without leaving SEARCH mode |
+| `Ctrl+S` | Open playlist picker to save selected search result to a playlist |
 
 ## Command
 

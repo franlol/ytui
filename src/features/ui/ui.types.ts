@@ -9,6 +9,8 @@ export type UiState = {
   themePickerOpen: boolean
   themePickerSelectedIndex: number
   themePickerPreviousId: string
+  playlistPickerOpen: boolean
+  playlistPickerSelectedIndex: number
   statusMessage: string | null
   statusLevel: StatusLevel | null
 }
