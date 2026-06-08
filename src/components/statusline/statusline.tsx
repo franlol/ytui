@@ -3,7 +3,8 @@ import { formatStatusMessage, resolveStatusTextColor } from "./statusline.helper
 import type { StatuslineProps } from "./statusline.types"
 
 export function Statusline(props: StatuslineProps) {
-  const right = `q:${props.queueLength} vol:${props.volume}% sb:${props.sidebarCollapsed ? "off" : "on"}`
+  const volumeDisplay = props.volume === null ? "--" : `${props.volume}%`
+  const right = `q:${props.queueLength} vol:${volumeDisplay} sb:${props.sidebarCollapsed ? "off" : "on"}`
   const statusMessage = formatStatusMessage(props.statusMessage, props.statusLevel)
   const statusTextColor = resolveStatusTextColor(props.theme, props.statusLevel)
 

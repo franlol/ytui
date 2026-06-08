@@ -118,12 +118,13 @@ export class MpvPlaybackService implements PlaybackService {
 
   async getProgress(): Promise<PlaybackProgress> {
     if (!this.process || !this.ipcPath) {
+      const volume = await readDefaultSinkVolume()
       return {
         elapsedSec: 0,
         durationSec: null,
         paused: true,
         available: false,
-        volume: null,
+        volume,
       }
     }
 

@@ -8,7 +8,7 @@ export type StatuslineProps = {
   statusMessage: string | null
   statusLevel: StatusLevel | null
   queueLength: number
-  volume: number
+  volume: number | null
   sidebarCollapsed: boolean
   width: number
   theme: ThemeTokens

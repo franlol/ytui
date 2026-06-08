@@ -310,6 +310,32 @@ describe("playback thunks", () => {
     expect(state.nowPlaying).not.toBeNull()
   })
 
+  it("syncs volume even when nothing is playing", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 0, durationSec: null, paused: true, available: false, volume: 65 }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    expect(store.getState().playback.volume).toBeNull()
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    expect(store.getState().playback.volume).toBe(65)
+    expect(store.getState().playback.nowPlaying).toBeNull()
+    expect(store.getState().playback.syncMisses).toBe(0)
+  })
+
   it("clears nowPlaying after 3 consecutive unavailable syncs", async () => {
     const services = makeServices({
       info: {
