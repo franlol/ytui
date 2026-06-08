@@ -50,7 +50,7 @@ Protect MVP UX consistency.
 - HelpModal uses `Modal` base with `strategy: "centered"`, `widthFraction=0.68`, `minWidth=48`, `heightFraction=0.6`; ThemePicker uses `Modal` base with `strategy: "centered"`, `width=60`, `heightFraction=0.6`
 - all overlay components must use the shared `Modal` container (`src/components/modal/modal.tsx`); direct inline-chrome overlays are a regression
 - LOGS mode: `j`/`k` scroll entries one row at a time, `G` (shift+g) calls `logsActions.jumpToBottom()` and resumes follow mode; `Ctrl+D`/`Ctrl+U` page down/up by 10 rows; title bar shows `LOGS (N) [FOLLOW]` when `scrollOffset >= entries.length - 1`, `LOGS (N)` otherwise
-- Tab cycle includes LOGS: normal → search → zen → library → logs → normal
+- Tab cycle includes LOGS: normal → search → zen → library → logs → normal (forward); Shift+Tab cycles in reverse: normal → logs → library → zen → search → normal; both use `cycleMode` / `cycleModeBack` reducers from the UI slice
 - `:logs` switches to LOGS mode; `:logs clear` clears all entries and resets `scrollOffset` to 0
 - follow mode is implicit (no Redux flag): new entries auto-advance `scrollOffset` only when already at bottom; manual scroll up breaks follow mode; `G` restores it
 

@@ -72,7 +72,7 @@ File: `~/.config/ytui/library.json`
 
 ## LIBRARY Mode
 
-Activated by pressing `Tab` (cycles `normal → search → zen → library → normal`) or `:library` (not a registered command — use `Tab`).
+Activated by pressing `Tab` (cycles `normal → search → zen → library → logs → normal`) or `Shift+Tab` (reverse: `normal → logs → library → zen → search → normal`), or `:library` (not a registered command — use `Tab`).
 
 The LIBRARY screen is a two-panel layout:
 - **Left panel** (fixed 24 cols): playlist list

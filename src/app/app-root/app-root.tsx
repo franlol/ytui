@@ -226,7 +226,11 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (key.name === "tab") {
-        dispatch(uiActions.cycleMode())
+        if (key.shift) {
+          dispatch(uiActions.cycleModeBack())
+        } else {
+          dispatch(uiActions.cycleMode())
+        }
         return
       }
 

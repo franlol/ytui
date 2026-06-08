@@ -29,6 +29,11 @@ export const uiSlice = createSlice({
       const index = order.indexOf(state.mode)
       state.mode = order[(index + 1) % order.length]
     },
+    cycleModeBack(state) {
+      const order: Mode[] = ["normal", "search", "zen", "library", "logs"]
+      const index = order.indexOf(state.mode)
+      state.mode = order[(index - 1 + order.length) % order.length]
+    },
     setSidebarCollapsed(state, action: PayloadAction<boolean>) {
       state.sidebarCollapsed = action.payload
     },

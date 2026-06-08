@@ -6,7 +6,7 @@ tools: "Read, Grep, Glob, Bash"
 You are the UI guardian.
 
 Validate UX rules:
-- views NORMAL, SEARCH, ZEN
+- views NORMAL, SEARCH, ZEN, LIBRARY, LOGS
 - help modal via `:?`
 - sidebar controlled by commands
 - statusline and command-mode behavior remain coherent
@@ -23,5 +23,11 @@ Validate UX rules:
 - theme picker opens as an absolute overlay on `:theme pick`; j/k/down/up navigate and apply live preview via `settingsActions.setTheme`; Escape restores `themePickerPreviousId` and closes; Enter confirms and closes; theme picker blocks all other key routes while open
 - HelpModal uses `Modal` base with `strategy: "centered"`, `widthFraction=0.68`, `minWidth=48`, `heightFraction=0.6`; ThemePicker uses `Modal` base with `strategy: "centered"`, `width=60`, `heightFraction=0.6`
 - all overlay components must use the shared `Modal` container (`src/components/modal/modal.tsx`); direct inline-chrome overlays (`position="absolute"` + `borderStyle="double"` applied outside Modal) are a regression
+- queue management keybinds must be NORMAL-mode-only: `[n]gg` → first/nth track, `[n]G` → last/nth track, `[n]dd` → remove n tracks from cursor; count digits accumulate and reset on j/k or unrecognized key
+- `Ctrl+A` in SEARCH enqueues selected result without mode switch; bare `a` must still append to the search query
+- `:queue clear` empties the queue and resets cursor to 0
+- LOGS mode: `j`/`k` scroll entries, `G` (shift+g) jumps to bottom and resumes follow mode; title shows `[FOLLOW]` badge when `scrollOffset >= entries.length - 1`; new entries auto-advance offset only when at bottom (follow mode implicit)
+- `:logs` switches to LOGS mode; `:logs clear` empties the log buffer
+- Tab cycle order (forward): normal → search → zen → library → logs → normal; Shift+Tab reverses: normal → logs → library → zen → search → normal; implemented via `cycleMode` / `cycleModeBack` in the UI slice
 
 Prioritize user-visible regressions in output.
