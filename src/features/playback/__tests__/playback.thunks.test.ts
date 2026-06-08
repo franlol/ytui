@@ -1,8 +1,16 @@
 import { describe, expect, it } from "bun:test"
 import { createAppStore } from "../../../state/store/store"
+import { queueActions } from "../../queue/queue.slice"
 import { uiActions } from "../../ui/ui.slice"
 import { playbackActions } from "../playback.slice"
-import { runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, runTogglePauseResumeThunk } from "../playback.thunks"
+import {
+  runPlayNextInQueueThunk,
+  runPlayPreviousInQueueThunk,
+  runPlayTrackThunk,
+  runSeekPlaybackThunk,
+  runSyncPlaybackProgressThunk,
+  runTogglePauseResumeThunk,
+} from "../playback.thunks"
 import type { AppServices } from "../../../state/store/store.types"
 import type { MusicProvider } from "../../../services/providers/provider.types"
 import type { Track } from "../../../types/app.types"
@@ -14,6 +22,24 @@ const track: Track = {
   author: "Author",
   durationSec: 180,
   durationLabel: "03:00",
+  source: "youtube",
+}
+
+const trackB: Track = {
+  id: "t-2",
+  title: "Track Two",
+  author: "Author",
+  durationSec: 200,
+  durationLabel: "03:20",
+  source: "youtube",
+}
+
+const trackC: Track = {
+  id: "t-3",
+  title: "Track Three",
+  author: "Author",
+  durationSec: 220,
+  durationLabel: "03:40",
   source: "youtube",
 }
 
@@ -63,6 +89,23 @@ function makeServices(provider: MusicProvider): AppServices {
     progressStyleRegistry: {} as any,
     libraryService: { load: async () => [], save: async () => {} },
   }
+}
+
+function makePlaybackServices(): AppServices {
+  return makeServices({
+    info: {
+      id: "youtube",
+      name: "YouTube",
+      description: "test",
+      capabilities: { search: true, playback: true, auth: false, library: false },
+    },
+    playback: {
+      play: async () => {},
+      pause: async () => {},
+      resume: async () => {},
+      stop: async () => {},
+    },
+  })
 }
 
 describe("playback thunks", () => {
@@ -365,5 +408,127 @@ describe("playback thunks", () => {
     expect(state.nowPlaying).toBeNull()
     expect(state.playing).toBe(false)
     expect(state.syncMisses).toBe(0)
+  })
+})
+
+describe("runPlayNextInQueueThunk", () => {
+  it("is a no-op when queue is empty", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    await store.dispatch(runPlayNextInQueueThunk())
+    expect(store.getState().playback.nowPlaying).toBeNull()
+    expect(store.getState().queue.playingIndex).toBeNull()
+  })
+
+  it("plays first track when playingIndex is null", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB, trackC]))
+    await store.dispatch(runPlayNextInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBe(0)
+    expect(store.getState().playback.nowPlaying?.id).toBe(track.id)
+  })
+
+  it("advances to next track in queue", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB, trackC]))
+    store.dispatch(queueActions.setPlayingIndex(0))
+    await store.dispatch(runPlayNextInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBe(1)
+    expect(store.getState().playback.nowPlaying?.id).toBe(trackB.id)
+  })
+
+  it("clears playingIndex at end of queue when repeatMode is none", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB]))
+    store.dispatch(queueActions.setPlayingIndex(1))
+    await store.dispatch(runPlayNextInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBeNull()
+  })
+
+  it("wraps to first track when repeatMode is all", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB]))
+    store.dispatch(queueActions.setPlayingIndex(1))
+    store.dispatch(queueActions.setRepeatMode("all"))
+    await store.dispatch(runPlayNextInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBe(0)
+    expect(store.getState().playback.nowPlaying?.id).toBe(track.id)
+  })
+
+  it("replays same track when repeatMode is one", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB]))
+    store.dispatch(queueActions.setPlayingIndex(0))
+    store.dispatch(queueActions.setRepeatMode("one"))
+    await store.dispatch(runPlayNextInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBe(0)
+    expect(store.getState().playback.nowPlaying?.id).toBe(track.id)
+  })
+})
+
+describe("runPlayPreviousInQueueThunk", () => {
+  it("is a no-op when queue is empty", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    await store.dispatch(runPlayPreviousInQueueThunk())
+    expect(store.getState().playback.nowPlaying).toBeNull()
+  })
+
+  it("plays previous track", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB, trackC]))
+    store.dispatch(queueActions.setPlayingIndex(2))
+    await store.dispatch(runPlayPreviousInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBe(1)
+    expect(store.getState().playback.nowPlaying?.id).toBe(trackB.id)
+  })
+
+  it("shows info status at start of queue when repeatMode is none", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB]))
+    store.dispatch(queueActions.setPlayingIndex(0))
+    await store.dispatch(runPlayPreviousInQueueThunk())
+    expect(store.getState().ui.statusMessage).toBe("INFO: already at first track")
+  })
+
+  it("wraps to last track when repeatMode is all and at first track", async () => {
+    const { store } = createAppStore(makePlaybackServices())
+    store.dispatch(queueActions.setQueue([track, trackB, trackC]))
+    store.dispatch(queueActions.setPlayingIndex(0))
+    store.dispatch(queueActions.setRepeatMode("all"))
+    await store.dispatch(runPlayPreviousInQueueThunk())
+    expect(store.getState().queue.playingIndex).toBe(2)
+    expect(store.getState().playback.nowPlaying?.id).toBe(trackC.id)
+  })
+})
+
+describe("runSyncPlaybackProgressThunk auto-advance", () => {
+  it("triggers auto-advance after 3 sync misses", async () => {
+    const services = makeServices({
+      info: {
+        id: "youtube",
+        name: "YouTube",
+        description: "test",
+        capabilities: { search: true, playback: true, auth: false, library: false },
+      },
+      playback: {
+        play: async () => {},
+        pause: async () => {},
+        resume: async () => {},
+        getProgress: async () => ({ elapsedSec: 0, durationSec: null, paused: false, available: false, volume: null }),
+        stop: async () => {},
+      },
+    })
+
+    const { store } = createAppStore(services)
+    store.dispatch(queueActions.setQueue([track, trackB]))
+    store.dispatch(queueActions.setPlayingIndex(0))
+    store.dispatch(playbackActions.setNowPlaying(track))
+    store.dispatch(playbackActions.setPlaying(true))
+
+    await store.dispatch(runSyncPlaybackProgressThunk())
+    await store.dispatch(runSyncPlaybackProgressThunk())
+    await store.dispatch(runSyncPlaybackProgressThunk())
+
+    expect(store.getState().queue.playingIndex).toBe(1)
+    expect(store.getState().playback.nowPlaying?.id).toBe(trackB.id)
   })
 })

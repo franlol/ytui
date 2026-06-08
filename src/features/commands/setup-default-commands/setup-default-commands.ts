@@ -1,6 +1,7 @@
 import { libraryActions } from "../../library/library.slice"
 import { logsActions } from "../../logs/logs.slice"
 import { saveLibraryThunk } from "../../library/library.thunks"
+import { runPlayNextInQueueThunk, runPlayPreviousInQueueThunk } from "../../playback/playback.thunks"
 import { switchActiveProviderThunk } from "../../provider/provider.thunks"
 import { queueActions } from "../../queue/queue.slice"
 import { searchActions } from "../../search/search.slice"
@@ -228,12 +229,58 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
     name: "queue",
     description: "Manage the queue",
     execute: (args, context) => {
-      if (args[0] === "clear") {
+      const sub = args[0]
+
+      if (sub === "clear") {
         context.dispatch(queueActions.clearQueue())
         context.dispatch(uiActions.setStatus({ message: "OK: queue cleared", level: "ok" }))
         return
       }
-      context.dispatch(uiActions.setStatus({ message: "ERR: use :queue clear", level: "err" }))
+
+      if (sub === "next") {
+        void context.dispatch(runPlayNextInQueueThunk())
+        return
+      }
+
+      if (sub === "prev") {
+        void context.dispatch(runPlayPreviousInQueueThunk())
+        return
+      }
+
+      if (sub === "shuffle") {
+        const arg = args[1]
+        if (arg === "on") {
+          context.dispatch(queueActions.setShuffleEnabled(true))
+          context.dispatch(uiActions.setStatus({ message: "OK: shuffle on", level: "ok" }))
+          return
+        }
+        if (arg === "off") {
+          context.dispatch(queueActions.setShuffleEnabled(false))
+          context.dispatch(uiActions.setStatus({ message: "OK: shuffle off", level: "ok" }))
+          return
+        }
+        if (arg === "toggle" || arg === undefined) {
+          context.dispatch(queueActions.toggleShuffle())
+          const enabled = !context.getState().queue.shuffleEnabled
+          context.dispatch(uiActions.setStatus({ message: `OK: shuffle ${enabled ? "on" : "off"}`, level: "ok" }))
+          return
+        }
+        context.dispatch(uiActions.setStatus({ message: "ERR: use :queue shuffle on|off|toggle", level: "err" }))
+        return
+      }
+
+      if (sub === "repeat") {
+        const arg = args[1]
+        if (arg === "none" || arg === "one" || arg === "all") {
+          context.dispatch(queueActions.setRepeatMode(arg))
+          context.dispatch(uiActions.setStatus({ message: `OK: repeat ${arg}`, level: "ok" }))
+          return
+        }
+        context.dispatch(uiActions.setStatus({ message: "ERR: use :queue repeat none|one|all", level: "err" }))
+        return
+      }
+
+      context.dispatch(uiActions.setStatus({ message: "ERR: use :queue clear|next|prev|shuffle|repeat", level: "err" }))
     },
   })
 

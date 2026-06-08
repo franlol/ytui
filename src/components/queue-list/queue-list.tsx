@@ -39,8 +39,8 @@ export function QueueList(props: QueueListProps) {
       <select
         width={props.widthCols}
         height={Math.max(1, panelHeight - 2)}
-        options={props.tracks.map((track) => ({
-          name: buildName(track.title, track.id === props.nowPlayingTrackId, props.widthCols),
+        options={props.tracks.map((track, index) => ({
+          name: buildName(track.title, props.playingIndex != null && index === props.playingIndex, props.widthCols),
           description: `${track.author}  ${track.durationLabel}`,
           value: track.id,
         }))}

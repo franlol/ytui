@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit"
 import { libraryActions } from "../library/library.slice"
 import { saveLibraryThunk } from "../library/library.thunks"
 import { logsActions } from "../logs/logs.slice"
+import { queueActions } from "../queue/queue.slice"
 import { uiActions } from "../ui/ui.slice"
 import { runStartVisualizerThunk, runStopVisualizerThunk } from "../visualizer/visualizer.thunks"
 import { playbackActions } from "./playback.slice"
@@ -41,6 +42,72 @@ export const runPlayTrackThunk = createAsyncThunk<void, Track, { state: RootStat
       dispatch(logsActions.addEntry({ level: "error", source: "playback", message }))
       dispatch(uiActions.setStatus({ message: `ERR: ${message}`, level: "err" }))
     }
+  },
+)
+
+export const runPlayNextInQueueThunk = createAsyncThunk<void, void, { state: RootState; extra: AppServices }>(
+  "queue/play-next",
+  async (_payload, { dispatch, getState }) => {
+    const { tracks, playingIndex, repeatMode, shuffleEnabled } = getState().queue
+
+    if (tracks.length === 0) return
+
+    let nextIndex: number | null = null
+
+    if (repeatMode === "one" && playingIndex !== null) {
+      nextIndex = playingIndex
+    } else if (shuffleEnabled) {
+      nextIndex = Math.floor(Math.random() * tracks.length)
+    } else {
+      const current = playingIndex ?? -1
+      const candidate = current + 1
+      if (candidate < tracks.length) {
+        nextIndex = candidate
+      } else if (repeatMode === "all") {
+        nextIndex = 0
+      }
+    }
+
+    if (nextIndex === null) {
+      dispatch(queueActions.setPlayingIndex(null))
+      return
+    }
+
+    dispatch(queueActions.setPlayingIndex(nextIndex))
+    dispatch(queueActions.setSelectedIndex(nextIndex))
+    await dispatch(runPlayTrackThunk(tracks[nextIndex]))
+  },
+)
+
+export const runPlayPreviousInQueueThunk = createAsyncThunk<void, void, { state: RootState; extra: AppServices }>(
+  "queue/play-prev",
+  async (_payload, { dispatch, getState }) => {
+    const { tracks, playingIndex, repeatMode, shuffleEnabled } = getState().queue
+
+    if (tracks.length === 0) return
+
+    let prevIndex: number | null = null
+
+    if (shuffleEnabled) {
+      prevIndex = Math.floor(Math.random() * tracks.length)
+    } else {
+      const current = playingIndex ?? tracks.length
+      const candidate = current - 1
+      if (candidate >= 0) {
+        prevIndex = candidate
+      } else if (repeatMode === "all") {
+        prevIndex = tracks.length - 1
+      }
+    }
+
+    if (prevIndex === null) {
+      dispatch(uiActions.setStatus({ message: "INFO: already at first track", level: "info" }))
+      return
+    }
+
+    dispatch(queueActions.setPlayingIndex(prevIndex))
+    dispatch(queueActions.setSelectedIndex(prevIndex))
+    await dispatch(runPlayTrackThunk(tracks[prevIndex]))
   },
 )
 
@@ -148,6 +215,7 @@ export const runSyncPlaybackProgressThunk = createAsyncThunk<void, void, { state
     dispatch(playbackActions.setSyncMisses(misses))
     if (state.playback.playing && misses >= 3) {
       dispatch(playbackActions.setNowPlaying(null))
+      void dispatch(runPlayNextInQueueThunk())
     } else if (state.playback.playing) {
       dispatch(playbackActions.tick())
     }

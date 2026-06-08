@@ -6,7 +6,7 @@ import type { Track } from "../../types/app.types"
 import { parseCommandInput } from "../../features/commands/command-parser/command-parser"
 import { libraryActions } from "../../features/library/library.slice"
 import { saveLibraryThunk } from "../../features/library/library.thunks"
-import { runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
+import { runPlayNextInQueueThunk, runPlayPreviousInQueueThunk, runPlayTrackThunk, runSeekPlaybackThunk, runSyncPlaybackProgressThunk, runTogglePauseResumeThunk } from "../../features/playback/playback.thunks"
 import { queueActions } from "../../features/queue/queue.slice"
 import { searchActions } from "../../features/search/search.slice"
 import { runSearchThunk } from "../../features/search/search.thunks"
@@ -129,6 +129,7 @@ export function AppRoot(props: AppRootProps) {
 
     const track = state.queue.tracks[state.queue.selectedIndex]
     if (track) {
+      dispatch(queueActions.setPlayingIndex(state.queue.selectedIndex))
       dispatch(runPlayTrackThunk(track))
       return
     }
@@ -379,7 +380,7 @@ export function AppRoot(props: AppRootProps) {
           return
         }
 
-        if (key.name === "return") {
+        if (key.name === "return" || (key.ctrl && key.name === "p")) {
           playTrackFromState()
           return
         }
@@ -402,6 +403,17 @@ export function AppRoot(props: AppRootProps) {
         if (key.name === "k" || key.name === "up") {
           resetKeySeq()
           dispatch(queueActions.moveSelectionUp())
+          return
+        }
+
+        if (key.sequence === "]") {
+          dispatch(runPlayNextInQueueThunk())
+          return
+        }
+
+        if (key.sequence === "[") {
+          dispatch(runPlayPreviousInQueueThunk())
+          return
         }
       }
     },
