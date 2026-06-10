@@ -55,7 +55,6 @@ export function AppRoot(props: AppRootProps) {
   const dispatch = useDispatch<AppDispatch>()
   const state = useSelector((root: RootState) => root)
   const dimensions = useTerminalDimensions()
-  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keySeqRef = useRef<{ count: string; pending: string | null }>({ count: "", pending: null })
   const pendingTrackRef = useRef<Track | null>(null)
   const libraryKeyPendingRef = useRef<string | null>(null)
@@ -70,27 +69,12 @@ export function AppRoot(props: AppRootProps) {
     }
   }, [dispatch])
 
-  useEffect(() => {
-    return () => {
-      if (statusTimerRef.current) {
-        clearTimeout(statusTimerRef.current)
-        statusTimerRef.current = null
-      }
-    }
-  }, [])
-
-  const setStatusWithTimeout = useCallback(
+  // Auto-clear is owned by the status-timeout listener middleware.
+  const setStatus = useCallback(
     (message: string, level: "ok" | "err" | "info" = "info") => {
-      if (statusTimerRef.current) {
-        clearTimeout(statusTimerRef.current)
-      }
-
       dispatch(uiActions.setStatus({ message, level }))
-      statusTimerRef.current = setTimeout(() => {
-        dispatch(uiActions.clearStatus())
-      }, props.store.getState().settings.statusTimeoutMs)
     },
-    [dispatch, props.store],
+    [dispatch],
   )
 
   const executeCommand = useCallback(
@@ -102,7 +86,7 @@ export function AppRoot(props: AppRootProps) {
 
       const command = props.commandRegistry.resolve(parsed.name)
       if (!command) {
-        setStatusWithTimeout(`ERR: unknown command :${parsed.name}`, "err")
+        setStatus(`ERR: unknown command :${parsed.name}`, "err")
         return
       }
 
@@ -115,7 +99,7 @@ export function AppRoot(props: AppRootProps) {
         requestQuit: props.requestQuit,
       })
     },
-    [props.commandRegistry, props.progressStyleRegistry, props.requestQuit, props.store, props.themeRegistry, setStatusWithTimeout],
+    [props.commandRegistry, props.progressStyleRegistry, props.requestQuit, props.store, props.themeRegistry, setStatus],
   )
 
   const playTrackFromState = useCallback(() => {
@@ -156,6 +140,13 @@ export function AppRoot(props: AppRootProps) {
 
   useKeyboard(
     (key) => {
+      // Ctrl+C must always quit through the full cleanup path (stop mpv/cava,
+      // unload audio routes, persist config/library), regardless of overlays.
+      if (key.ctrl && key.name === "c") {
+        props.requestQuit()
+        return
+      }
+
       if (state.ui.helpOpen) {
         if (key.name === "escape" || key.name === "q" || key.name === "return") {
           dispatch(uiActions.setHelpOpen(false))
@@ -190,7 +181,7 @@ export function AppRoot(props: AppRootProps) {
           if (target && track) {
             dispatch(libraryActions.addTrackToPlaylist({ playlistId: target.id, track }))
             dispatch(saveLibraryThunk())
-            setStatusWithTimeout(`OK: saved to "${target.name}"`, "ok")
+            setStatus(`OK: saved to "${target.name}"`, "ok")
           }
           pendingTrackRef.current = null
           dispatch(uiActions.closePlaylistPicker())
@@ -201,12 +192,6 @@ export function AppRoot(props: AppRootProps) {
           dispatch(uiActions.closePlaylistPicker())
         }
         return
-      }
-
-      if (state.ui.mode === "settings") {
-        if (handleSettingsKey(key, state, dispatch, props)) {
-          return
-        }
       }
 
       if (state.ui.commandActive) {
@@ -232,6 +217,14 @@ export function AppRoot(props: AppRootProps) {
           dispatch(uiActions.setCommandBuffer(`${state.ui.commandBuffer}${key.sequence}`))
         }
         return
+      }
+
+      // Must stay below the commandActive block: settings navigation consumes
+      // h/j/k/l/[/]/arrows, which are also legitimate command-buffer input.
+      if (state.ui.mode === "settings") {
+        if (handleSettingsKey(key, state, dispatch, props)) {
+          return
+        }
       }
 
       if (key.name === "tab") {
@@ -300,7 +293,7 @@ export function AppRoot(props: AppRootProps) {
           const track = state.search.results[state.search.selectedIndex]
           if (track) {
             dispatch(queueActions.enqueueTrack(track))
-            setStatusWithTimeout("OK: added to queue", "ok")
+            setStatus("OK: added to queue", "ok")
           }
           return
         }
@@ -321,7 +314,7 @@ export function AppRoot(props: AppRootProps) {
       }
 
       if (state.ui.mode === "library") {
-        handleLibraryKey(key, state, dispatch, setStatusWithTimeout, playTrackFromState, libraryKeyPendingRef, (track) => {
+        handleLibraryKey(key, state, dispatch, setStatus, playTrackFromState, libraryKeyPendingRef, (track) => {
           pendingTrackRef.current = track
           dispatch(uiActions.openPlaylistPicker(0))
         })
@@ -347,7 +340,7 @@ export function AppRoot(props: AppRootProps) {
             const count = consumeCount(1)
             if (state.queue.tracks.length > 0) {
               dispatch(queueActions.removeTrackRange({ index: state.queue.selectedIndex, count }))
-              setStatusWithTimeout(count === 1 ? "OK: removed" : `OK: removed ${count}`, "ok")
+              setStatus(count === 1 ? "OK: removed" : `OK: removed ${count}`, "ok")
             }
             return
           }

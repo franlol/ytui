@@ -39,9 +39,9 @@ UI runtime note:
 - `ytui-strict` disables visualizer when ytui-isolated source cannot be verified; `system` intentionally visualizes global system audio.
 - NOW PLAYING progress bar supports click-to-seek; clicks outside the rendered bar are ignored and provider backends without seek capability fail with a status error.
 - NOW PLAYING time/progress prefers runtime playback telemetry (`mpv` time-pos/duration via provider playback capability) and falls back to local tick updates only when runtime telemetry is unavailable.
-- Library (playlists + history) persists to `~/.config/ytui/library.json`; managed via `:playlist new|delete|rename` and the `Ctrl+S` playlist picker overlay. See `docs/features/library.md`.
+- Library (playlists + history) persists to `~/.config/ytui/library.json`; reachable via Tab cycle or `:library`; managed via `:playlist new|delete|rename` and the `Ctrl+S` playlist picker overlay. See `docs/features/library.md`.
 - Logs screen is reachable via Tab cycle (`Tab` forward, `Shift+Tab` reverse), sidebar, or `:logs`. It captures structured events from playback, search, visualizer, plugins, and config. `:logs clear` empties the buffer. See `docs/features/logs.md`.
-- Settings screen is reachable via Tab cycle (after logs) or `:settings`. Navigate with `h`/`l` (category tabs), `j`/`k` (items), `←`/`→` (change value). Changes dispatch immediately; `Esc` persists all changes via `saveConfigThunk` and returns to the previous mode. See `docs/features/settings-slice.md` and `docs/components/settings-panel.md`.
+- Settings screen is reachable via Tab cycle (after logs) or `:settings`. Navigate with `h`/`l` (category tabs), `j`/`k` (items), `←`/`→` (change value). Changes dispatch immediately and persist via `saveConfigThunk` on every value change; `Esc` returns to NORMAL. Command mode (`:`) remains available inside SETTINGS. See `docs/features/settings-slice.md` and `docs/components/settings-panel.md`.
 - Command parser supports quoted tokens (`"name with spaces"`) for all commands, enabling multi-word playlist names.
 
 Start here, then read `docs/policies/agent-only-contributions.md`.

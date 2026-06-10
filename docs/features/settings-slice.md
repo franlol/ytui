@@ -54,9 +54,11 @@ Setting changed (← / → in SETTINGS mode)
   → configService.save() writes ~/.config/ytui/ytui.conf
 ```
 
-This ensures changes persist even if the app is killed with `Ctrl+C`.
+This ensures changes persist even if the app dies before a clean quit.
 
-`destroy()` in `create-app.tsx` also awaits `configService.save()` as a safety net for state changed outside the SETTINGS screen (sidebar collapse, theme picker, etc.).
+`destroy()` in `create-app.tsx` dispatches `saveConfigThunk` (single source of truth for config serialization) as a safety net for state changed outside the SETTINGS screen (sidebar collapse, theme picker, etc.). `destroy()` runs on `:q`, on `Ctrl+C` (routed through the app keyboard handler — opentui's `exitOnCtrlC` is disabled), and on `SIGINT`/`SIGTERM`; it is guarded against re-entry.
+
+`PLUGINS` and `PLUGINS_ENABLED` are round-tripped: `create-app.tsx` stores the loaded values in the plugins slice (`pluginsActions.setPluginConfig`) at startup, and `saveConfigThunk` writes them back from `state.plugins.configuredIds` / `state.plugins.pluginsEnabled`. Config saves must never reset the user's plugin configuration.
 
 ## Config persistence notes
 

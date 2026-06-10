@@ -29,7 +29,12 @@ Validate UX rules:
 - LOGS mode: `j`/`k` scroll entries, `G` (shift+g) jumps to bottom and resumes follow mode; title shows `[FOLLOW]` badge when `scrollOffset >= entries.length - 1`; new entries auto-advance offset only when at bottom (follow mode implicit)
 - `:logs` switches to LOGS mode; `:logs clear` empties the log buffer
 - Tab cycle order (forward): search → normal → zen → library → logs → settings → search; Shift+Tab reverses: search → settings → logs → library → zen → normal → search
-- SETTINGS mode: two-pane layout (categories left, items right); `j`/`k` navigate within focused pane; `l`/`→`/Enter moves focus to items; `h`/Esc moves focus back to categories; `←`/`→` changes the focused setting value (cycle enum / toggle bool / ±step number); changes dispatch immediately with live preview; keyboard preemption: settings mode handler fires before commandActive
+- SETTINGS mode: two-pane layout (categories left, items right); `j`/`k` navigate within focused pane; `l`/`→`/Enter moves focus to items; `h`/Esc moves focus back to categories; `←`/`→` changes the focused setting value (cycle enum / toggle bool / ±step number); changes dispatch immediately with live preview and persist via `saveConfigThunk`; keyboard preemption: the settings mode handler fires AFTER commandActive so `:` commands remain typeable in SETTINGS
 - SETTINGS mode preemption: all overlays (helpOpen, themePickerOpen, playlistPickerOpen) must still preempt settings keyboard handling; the settings handler must not consume keys when any overlay is open
+- every statusline message auto-clears after `settings.statusTimeoutMs` via the status-timeout listener middleware (`src/state/status-timeout/status-timeout.ts`); component-level status timers are a regression
+- queue-list `◆` marker requires both `index === playingIndex` and that track's id matching `playback.nowPlaying.id` (`isQueueTrackPlaying`); a stale `playingIndex` must never show a marker
+- HelpModal uses the shared `Modal` with content-fit sizing capped to the screen and documents all six modes plus the complete keymap/command set
+- `Ctrl+C` quits through the full cleanup path (`requestQuit` → `destroy`); opentui `exitOnCtrlC` stays disabled; `SIGINT`/`SIGTERM` route to the same `destroy`
+- mode-switch commands exist for every view: `:normal`, `:search`, `:zen`, `:library`, `:logs`, `:settings`
 
 Prioritize user-visible regressions in output.

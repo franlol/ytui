@@ -7,6 +7,7 @@ import { loadLibraryThunk } from "../../features/library/library.thunks"
 import { pluginsActions } from "../../features/plugins/plugins.slice"
 import { providerActions } from "../../features/provider/provider.slice"
 import { settingsActions } from "../../features/settings/settings.slice"
+import { saveConfigThunk } from "../../features/settings/settings.thunks"
 import { uiActions } from "../../features/ui/ui.slice"
 import { CommandRegistry } from "../../registries/commands/command.registry"
 import { createDefaultProgressStyleRegistry } from "../../registries/progress-styles/progress-style.registry"
@@ -23,7 +24,6 @@ import { Logger } from "../../services/logger/logger"
 import { CavaVisualizerService } from "../../services/visualizer/cava-visualizer.service"
 import { createAppStore } from "../../state/store/store"
 import type { AppServices } from "../../state/store/store.types"
-import type { ProviderInfo } from "../../types/app.types"
 import type { AppRuntime } from "./create-app.types"
 
 export async function createApp(): Promise<AppRuntime> {
@@ -60,6 +60,8 @@ export async function createApp(): Promise<AppRuntime> {
   providerManager.setActive(config.providerDefault)
   store.dispatch(providerActions.setProviders(providerManager.list().map((provider) => provider.info)))
   store.dispatch(providerActions.setActiveProvider(providerManager.getActive()?.info.id ?? "youtube"))
+
+  store.dispatch(pluginsActions.setPluginConfig({ pluginsEnabled: config.pluginsEnabled, configuredIds: config.plugins }))
 
   const loadedPlugins = await loadPluginManifests(config.plugins)
   store.dispatch(
@@ -100,37 +102,28 @@ export async function createApp(): Promise<AppRuntime> {
 
   logger.info("app", "started")
 
+  // Ctrl+C is routed through the app's keyboard handler (and the signal
+  // handlers below) so quitting always runs this full cleanup; opentui's
+  // built-in exit would only restore the terminal and leave mpv/cava running.
   const renderer = await createCliRenderer({
-    exitOnCtrlC: true,
+    exitOnCtrlC: false,
     useMouse: true,
   })
 
   const root = createRoot(renderer as any)
   let started = false
+  let destroying = false
 
   async function destroy() {
-    const current = store.getState()
-    await configService.save({
-      configVersion: 1,
-      theme: current.settings.themeId,
-      progressStyle: current.settings.progressStyleId,
-      cavaStyle: current.settings.cavaStyleId,
-      cavaSourceMode: current.settings.cavaSourceMode,
-      sidebar: current.ui.sidebarCollapsed ? "off" : "on",
-      defaultMode: current.settings.defaultMode === "settings" ? "normal" : current.settings.defaultMode,
-      resultsLimit: current.settings.resultsLimit,
-      cavaEnabled: current.settings.cavaEnabled,
-      cavaHeight: current.settings.cavaHeight,
-      statusTimeoutMs: current.settings.statusTimeoutMs,
-      useAlternateScreen: current.settings.useAlternateScreen,
-      pluginsEnabled: true,
-      plugins: [],
-      providerDefault: current.provider.activeProviderId,
-      providersEnabled: current.provider.available.map((provider: ProviderInfo) => provider.id),
-    })
+    if (destroying) {
+      return
+    }
+    destroying = true
+
+    await store.dispatch(saveConfigThunk())
 
     await Promise.allSettled([
-      libraryService.save(current.library.playlists),
+      libraryService.save(store.getState().library.playlists),
       providerManager.getActive()?.playback?.stop(),
       visualizerService.stop(),
     ])
@@ -142,6 +135,9 @@ export async function createApp(): Promise<AppRuntime> {
     renderer.destroy()
     process.exit(0)
   }
+
+  process.once("SIGINT", () => void destroy())
+  process.once("SIGTERM", () => void destroy())
 
   function start() {
     if (started) {

@@ -9,5 +9,6 @@ export type QueueListProps = {
   tracks: Track[]
   selectedIndex: number
   playingIndex?: number | null
+  nowPlayingTrackId?: string
   runtimeDurationSec?: number
 }

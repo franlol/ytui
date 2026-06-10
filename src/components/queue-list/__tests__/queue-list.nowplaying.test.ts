@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { isQueueTrackPlaying } from "../queue-list"
 
 function buildName(title: string, isPlaying: boolean, widthCols: number): string {
   const maxWidth = widthCols - 3
@@ -33,5 +34,27 @@ describe("QueueList buildName — now-playing indicator", () => {
   it("plain name is truncated to widthCols - 3 when too long", () => {
     const result = buildName("A very long title that overflows", false, 20)
     expect(result.length).toBeLessThanOrEqual(17)
+  })
+})
+
+describe("isQueueTrackPlaying — marker condition", () => {
+  it("marks the track at playingIndex when its id matches nowPlaying", () => {
+    expect(isQueueTrackPlaying(2, "abc", 2, "abc")).toBe(true)
+  })
+
+  it("does not mark when playingIndex is null", () => {
+    expect(isQueueTrackPlaying(2, "abc", null, "abc")).toBe(false)
+  })
+
+  it("does not mark a stale playingIndex when a different track is playing", () => {
+    expect(isQueueTrackPlaying(2, "abc", 2, "other")).toBe(false)
+  })
+
+  it("does not mark when nothing is playing (failed play cleared nowPlaying)", () => {
+    expect(isQueueTrackPlaying(2, "abc", 2, undefined)).toBe(false)
+  })
+
+  it("does not mark other indices even with matching id (duplicate tracks)", () => {
+    expect(isQueueTrackPlaying(3, "abc", 2, "abc")).toBe(false)
   })
 })

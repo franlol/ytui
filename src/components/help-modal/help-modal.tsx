@@ -1,7 +1,49 @@
 import { Modal } from "../modal/modal"
 import type { HelpModalProps } from "./help-modal.types"
 
+const KEY_LINES = [
+  "Tab / Shift+Tab   cycle modes",
+  "Esc               back to NORMAL",
+  ":                 command mode",
+  "Space             pause/resume",
+  "Enter             play selected",
+  "j / k             move selection",
+  "[ / ]             prev/next track  (NORMAL)",
+  "[n]gg / [n]G      jump to track    (NORMAL)",
+  "[n]dd             remove tracks    (NORMAL)",
+  "Ctrl+P            play selected    (SEARCH/LIB)",
+  "Ctrl+A            add to queue     (SEARCH/LIB)",
+  "Ctrl+S            save to playlist",
+  "h / l             panels (LIB) · category (SET)",
+  "dd                remove track     (LIBRARY)",
+  "Ctrl+D/U · G      scroll · bottom  (LOGS)",
+  "click bar         seek   ·   Ctrl+C: quit",
+]
+
+const COMMAND_LINES = [
+  ":q  ·  :?  (this help)",
+  ":search [query]",
+  ":normal · :zen · :library",
+  ":logs [clear] · :settings",
+  ":sidebar on|off|toggle",
+  ":theme list|<name>|pick",
+  ":progress list|<style>",
+  ":cava style|source list|<id>",
+  ":queue clear|next|prev",
+  ":queue shuffle on|off|toggle",
+  ":queue repeat none|one|all",
+  ":playlist new|delete|rename",
+  ":provider list|current|use <id>",
+  ":plugin list|info <id>|reload",
+]
+
 export function HelpModal(props: HelpModalProps) {
+  // 1 modes line + tallest column (heading + lines), plus border/padding chrome.
+  const contentRows = 1 + 1 + Math.max(KEY_LINES.length, COMMAND_LINES.length)
+  const height = Math.min(contentRows + 4, Math.max(8, props.screenHeight - 2))
+  const width = Math.min(82, Math.max(48, props.screenWidth - 2))
+  const columnWidth = Math.floor((width - 5) / 2)
+
   return (
     <Modal
       id="help-modal"
@@ -10,28 +52,25 @@ export function HelpModal(props: HelpModalProps) {
       theme={props.theme}
       screenWidth={props.screenWidth}
       screenHeight={props.screenHeight}
-      widthFraction={0.68}
-      minWidth={48}
-      heightFraction={0.6}
+      width={width}
+      height={height}
       positioning={{ strategy: "centered" }}
     >
-      <text content="Modes: SEARCH NORMAL ZEN" fg={props.theme.text} />
-      <text content="Tab: next mode  Shift+Tab: prev mode" fg={props.theme.text} />
-      <text content="Esc: back to normal" fg={props.theme.text} />
-      <text content=":sidebar toggle|on|off" fg={props.theme.text} />
-      <text content=":progress list | :progress <style>" fg={props.theme.text} />
-      <text content=":cava style list|<id> | :cava source list|<mode>" fg={props.theme.text} />
-      <text content=":theme list | :theme <name> | :theme pick" fg={props.theme.text} />
-      <text content=":provider list|current|use <id>" fg={props.theme.text} />
-      <text content=":plugin list|info <id>|reload" fg={props.theme.text} />
-      <text content="Ctrl+A (SEARCH): add result to queue" fg={props.theme.text} />
-      <text content="[n]gg / [n]G (NORMAL): jump to track n (default first/last)" fg={props.theme.text} />
-      <text content="[n]dd (NORMAL): delete n tracks from cursor (default 1)" fg={props.theme.text} />
-      <text content=":queue clear" fg={props.theme.text} />
-      <text content="Enter (NORMAL): play selected queue track" fg={props.theme.text} />
-      <text content="Ctrl+P (SEARCH): play selected result" fg={props.theme.text} />
-      <text content="Space: pause/resume current track" fg={props.theme.text} />
-      <text content="Click NOW PLAYING bar: seek" fg={props.theme.text} />
+      <text content="Modes: NORMAL · SEARCH · ZEN · LIBRARY · LOGS · SETTINGS  (Tab to cycle)" fg={props.theme.accent} />
+      <box flexDirection="row" gap={1}>
+        <box width={columnWidth} flexDirection="column">
+          <text content="KEYS" fg={props.theme.accent} />
+          {KEY_LINES.map((line) => (
+            <text key={line} content={line.slice(0, columnWidth)} fg={props.theme.text} />
+          ))}
+        </box>
+        <box width={columnWidth} flexDirection="column">
+          <text content="COMMANDS" fg={props.theme.accent} />
+          {COMMAND_LINES.map((line) => (
+            <text key={line} content={line.slice(0, columnWidth)} fg={props.theme.text} />
+          ))}
+        </box>
+      </box>
     </Modal>
   )
 }

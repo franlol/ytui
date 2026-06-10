@@ -23,7 +23,7 @@ type QueueState = {
 
 `selectedIndex` is the UI cursor used for navigation (`j`/`k`, `gg`, `G`, `dd`). It does not affect which track plays next.
 
-`playingIndex` tracks which queue entry is currently playing. It is set when the user presses Enter on a queue item or when auto-advance moves to the next track. The diamond marker (◆) in the queue list uses `playingIndex`, not track ID matching, so duplicate entries are handled correctly.
+`playingIndex` tracks which queue entry is currently playing. It is set when the user presses Enter on a queue item or when auto-advance moves to the next track. The diamond marker (◆) in the queue list requires both `index === playingIndex` *and* that track's id matching `playback.nowPlaying.id` (`isQueueTrackPlaying` in `src/components/queue-list/queue-list.tsx`). The index half keeps duplicate entries from double-marking; the id half prevents a stale marker when `playingIndex` no longer reflects reality (direct play from SEARCH/LIBRARY, or a failed play that cleared `nowPlaying`).
 
 ## Actions
 

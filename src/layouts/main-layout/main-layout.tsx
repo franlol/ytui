@@ -84,6 +84,7 @@ export function MainLayout(props: MainLayoutProps) {
         selectedIndex={props.state.queue.selectedIndex}
         widthCols={listWidth}
         playingIndex={props.state.queue.playingIndex}
+        nowPlayingTrackId={props.state.playback.nowPlaying?.id}
         runtimeDurationSec={props.state.playback.durationSec}
       />
     )

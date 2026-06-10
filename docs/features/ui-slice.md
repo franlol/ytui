@@ -45,8 +45,8 @@ type UiState = {
 | `closePlaylistPicker` | — | Closes the playlist picker |
 | `movePlaylistPickerDown` | `number` (pickable count) | Increments `playlistPickerSelectedIndex`, clamped to `count - 1` |
 | `movePlaylistPickerUp` | — | Decrements `playlistPickerSelectedIndex`, clamped to `0` |
-| `setStatus` | `{ message, level }` | Sets a transient status message |
-| `clearStatus` | — | Clears the status message |
+| `setStatus` | `{ message, level }` | Sets a transient status message; auto-cleared after `settings.statusTimeoutMs` by the status-timeout listener middleware (`src/state/status-timeout/status-timeout.ts`) |
+| `clearStatus` | — | Clears the status message immediately |
 | `moveSettingsCategoryNext` | `number` (category count) | Advances `settingsCategoryIndex` by 1, wrapping around; resets `settingsItemIndex` to 0 |
 | `moveSettingsCategoryPrev` | `number` (category count) | Moves `settingsCategoryIndex` back by 1, wrapping around; resets `settingsItemIndex` to 0 |
 | `moveSettingsItemDown` | `number` (item count) | Increments `settingsItemIndex`, clamped to `count - 1` |
@@ -105,8 +105,10 @@ The picker list excludes the `"history"` playlist (History is auto-managed). `pl
 Only one overlay may be open at a time. Keyboard events are consumed by the first matching condition:
 
 ```
-helpOpen → themePickerOpen → playlistPickerOpen → settings mode → commandActive → mode routing
+helpOpen → themePickerOpen → playlistPickerOpen → commandActive → settings mode → mode routing
 ```
+
+`commandActive` must run before the SETTINGS handler: settings navigation consumes `h`/`j`/`k`/`l`/`[`/`]`/arrows, which are also legitimate command-buffer characters. Command mode (`:`) therefore works normally inside SETTINGS.
 
 ## SETTINGS Mode Navigation
 

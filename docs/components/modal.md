@@ -71,7 +71,8 @@ All future absolute-overlay components must use `Modal` as their container. Do n
   <select ... />
 </Modal>
 
-// Centered dialog (e.g. help modal)
+// Centered content-fit dialog (e.g. help modal) — caller computes explicit
+// width/height from its content, capped to the screen
 <Modal
   id="help-modal"
   title="HELP"
@@ -79,9 +80,8 @@ All future absolute-overlay components must use `Modal` as their container. Do n
   theme={theme}
   screenWidth={screenWidth}
   screenHeight={screenHeight}
-  widthFraction={0.68}
-  minWidth={48}
-  heightFraction={0.6}
+  width={Math.min(82, Math.max(48, screenWidth - 2))}
+  height={Math.min(contentRows + 4, Math.max(8, screenHeight - 2))}
   positioning={{ strategy: "centered" }}
 >
   <text content="..." fg={theme.text} />
@@ -92,5 +92,6 @@ All future absolute-overlay components must use `Modal` as their container. Do n
 
 | Component | Strategy | Width | Height |
 |---|---|---|---|
-| `HelpModal` | `centered` | 68% of screen, min 48 | 60% of screen |
+| `HelpModal` | `centered` | content-fit: min 48, max 82, capped to screen | content-fit, capped to screen |
 | `ThemePicker` | `centered` | 60 cols | 60% of screen |
+| `PlaylistPicker` | `centered` | 50 cols | 50% of screen |

@@ -6,6 +6,18 @@ function buildName(title: string, isPlaying: boolean, widthCols: number): string
   return title.slice(0, maxWidth - 1).padEnd(maxWidth - 1) + "◆"
 }
 
+// playingIndex alone can go stale (direct play from search/library, or a failed
+// play that cleared nowPlaying) — the marker also requires the track at that
+// index to be the one actually playing.
+export function isQueueTrackPlaying(
+  index: number,
+  trackId: string,
+  playingIndex: number | null | undefined,
+  nowPlayingTrackId: string | undefined,
+): boolean {
+  return playingIndex != null && index === playingIndex && trackId === nowPlayingTrackId
+}
+
 export function QueueList(props: QueueListProps) {
   const panelHeight = Math.max(3, props.heightRows)
   const selectedIndex = Math.max(0, Math.min(props.selectedIndex, Math.max(0, props.tracks.length - 1)))
@@ -40,7 +52,11 @@ export function QueueList(props: QueueListProps) {
         width={props.widthCols}
         height={Math.max(1, panelHeight - 2)}
         options={props.tracks.map((track, index) => ({
-          name: buildName(track.title, props.playingIndex != null && index === props.playingIndex, props.widthCols),
+          name: buildName(
+            track.title,
+            isQueueTrackPlaying(index, track.id, props.playingIndex, props.nowPlayingTrackId),
+            props.widthCols,
+          ),
           description: `${track.author}  ${track.durationLabel}`,
           value: track.id,
         }))}

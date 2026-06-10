@@ -19,8 +19,8 @@ export const saveConfigThunk = createAsyncThunk<void, void, { extra: AppServices
       cavaHeight: current.settings.cavaHeight,
       statusTimeoutMs: current.settings.statusTimeoutMs,
       useAlternateScreen: current.settings.useAlternateScreen,
-      pluginsEnabled: true,
-      plugins: [],
+      pluginsEnabled: current.plugins.pluginsEnabled,
+      plugins: current.plugins.configuredIds,
       providerDefault: current.provider.activeProviderId,
       providersEnabled: current.provider.available.map((p: ProviderInfo) => p.id),
     })

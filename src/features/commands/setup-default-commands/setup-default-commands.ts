@@ -45,6 +45,22 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
   })
 
   commandRegistry.register({
+    name: "library",
+    description: "Switch to library mode",
+    execute: (_args, context) => {
+      context.dispatch(uiActions.setMode("library"))
+    },
+  })
+
+  commandRegistry.register({
+    name: "settings",
+    description: "Switch to settings mode",
+    execute: (_args, context) => {
+      context.dispatch(uiActions.setMode("settings"))
+    },
+  })
+
+  commandRegistry.register({
     name: "search",
     description: "Switch to search mode or set query",
     execute: (args, context) => {
@@ -261,7 +277,7 @@ export function setupDefaultCommands(commandRegistry: CommandRegistry) {
         }
         if (arg === "toggle" || arg === undefined) {
           context.dispatch(queueActions.toggleShuffle())
-          const enabled = !context.getState().queue.shuffleEnabled
+          const enabled = context.getState().queue.shuffleEnabled
           context.dispatch(uiActions.setStatus({ message: `OK: shuffle ${enabled ? "on" : "off"}`, level: "ok" }))
           return
         }
